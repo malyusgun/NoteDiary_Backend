@@ -1,0 +1,23 @@
+{
+  "name": "ShelfNote_backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://gl.iqdev.team/d.malygin/shelfnote_backend",
+  "author": "Дмитрий Малюгин <d.malygin@iqdev.digital>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.3",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
