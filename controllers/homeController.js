@@ -1,9 +1,17 @@
-import HomeService from "../services/homeService.js";
+import HomeService from '../services/homeService.js';
 
 class HomeController {
   async getEntities() {
     try {
       return await HomeService.getEntities();
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
+  async getHomeBackgroundUrl() {
+    try {
+      return await HomeService.getHomeBackgroundUrl();
     } catch (error) {
       console.log(error);
       return error;
@@ -33,6 +41,13 @@ class HomeController {
   async changeOrderEntity(req) {
     try {
       return await HomeService.changeOrderEntity(req.body);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async changeHomeBackgroundUrl(req) {
+    try {
+      return await HomeService.changeHomeBackgroundUrl(req.body);
     } catch (error) {
       console.log(error);
     }

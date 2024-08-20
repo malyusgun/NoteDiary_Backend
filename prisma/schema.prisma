@@ -12,7 +12,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -35,10 +34,19 @@ model Home_entity {
   entity_type    String
   title          String?
   text           String? @db.Text
-  image_data     String? @db.Text
+  text_size      String?
+  paragraph_size String?
+  text_position  String?
+  image_url     String? @db.Text
   image_width    Int?
   image_height   Int?
   image_position String?
+  image_scale    String?
   table_columns  Json?
   table_data     Json?
+}
+
+model Setting {
+  setting_name String @unique
+  setting_value String
 }

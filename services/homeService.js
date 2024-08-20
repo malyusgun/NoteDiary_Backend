@@ -8,8 +8,14 @@ class HomeService {
       orderBy: [{ entity_order: 'asc' }]
     });
   }
+  async getHomeBackgroundUrl() {
+    return prisma.setting.findFirst({
+      where: {
+        setting_name: 'homeBackgroundUrl'
+      }
+    });
+  }
   async createEntity(body) {
-    console.log('body: ', body);
     return prisma.home_entity.create({ data: body });
   }
   async editEntity(body) {
@@ -38,12 +44,10 @@ class HomeService {
       orderBy: [{ entity_order: 'asc' }]
     });
     const currentEntity = allEntities.find((entity) => entity.entity_uuid === body.entity_uuid);
-    console.log('currentEntity: ', currentEntity);
     const nextEntity =
       body.direction === 'up'
         ? allEntities.reverse().find((entity) => entity.entity_order < currentEntity.entity_order)
         : allEntities.find((entity) => entity.entity_order > currentEntity.entity_order);
-    console.log('nextEntity: ', nextEntity);
     await prisma.home_entity.update({
       where: {
         entity_uuid: currentEntity.entity_uuid
@@ -52,7 +56,6 @@ class HomeService {
         entity_order: nextEntity.entity_order
       }
     });
-    // await Home_entity.upsert({...currentEntity, entity_order: nextEntity.entity_order});
     await prisma.home_entity.update({
       where: {
         entity_uuid: nextEntity.entity_uuid
@@ -61,8 +64,23 @@ class HomeService {
         entity_order: currentEntity.entity_order
       }
     });
-    // await Home_entity.upsert({...nextEntity, entity_order: currentEntity.entity_order});
     return body;
+  }
+  async changeHomeBackgroundUrl(body) {
+    const homeBackgroundUrl = await prisma.setting.findFirst({
+      where: {
+        setting_name: 'homeBackgroundUrl'
+      }
+    });
+    if (homeBackgroundUrl) {
+      return prisma.setting.update({
+        where: {
+          setting_name: 'homeBackgroundUrl'
+        },
+        data: { ...body }
+      });
+    }
+    return prisma.setting.create({ data: { ...body } });
   }
 }
 

@@ -30,6 +30,17 @@ wss.on('connection', (ws) => {
           );
         });
         break;
+      case 'getHomeBackgroundUrl':
+        const homeBackgroundUrl = await HomeController.getHomeBackgroundUrl();
+        wss.clients.forEach((client) => {
+          client.send(
+            JSON.stringify({
+              event: 'getHomeBackgroundUrl',
+              data: homeBackgroundUrl
+            })
+          );
+        });
+        break;
       case 'createHomeEntity':
         const createdHomeEntity = await HomeController.createEntity(req);
         wss.clients.forEach((client) => {
@@ -69,6 +80,17 @@ wss.on('connection', (ws) => {
           client.send(
             JSON.stringify({
               event: 'changeOrderHomeEntity',
+              data: { ...req.body }
+            })
+          );
+        });
+        break;
+      case 'changeHomeBackgroundUrl':
+        await HomeController.changeHomeBackgroundUrl(req);
+        wss.clients.forEach((client) => {
+          client.send(
+            JSON.stringify({
+              event: 'changeHomeBackgroundUrl',
               data: { ...req.body }
             })
           );
