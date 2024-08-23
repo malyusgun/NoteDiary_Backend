@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import * as fs from 'node:fs';
+import path from 'node:path';
 
 const prisma = new PrismaClient();
 
@@ -16,7 +18,19 @@ class HomeService {
     });
   }
   async createEntity(body) {
-    return prisma.home_entity.create({ data: body });
+    let pathOfImage = '';
+    if (body.image_url) {
+      console.log('body.image_url', body.image_url);
+      // const response = await fetch(body.image_url);
+      // const blob = await body.image_url.blob();
+      const arrayBuffer = new ArrayBuffer(body.image_url);
+      // const arrayBuffer = await body.image_url.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      pathOfImage = path.join(path.resolve(), `/public/images/${body.entity_uuid}`);
+      console.log('pathOfImage', pathOfImage);
+      fs.writeFile(pathOfImage, buffer, () => console.log('Written!'));
+    }
+    return prisma.home_entity.create({ data: { ...body, image_url: pathOfImage } });
   }
   async editEntity(body) {
     return prisma.home_entity.update({

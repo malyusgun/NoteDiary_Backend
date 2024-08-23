@@ -4,7 +4,6 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-// prisma db push
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,6 +11,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // при запуске с рабочего ноутбука
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -34,13 +35,14 @@ model Home_entity {
   entity_type    String
   title          String?
   text           String? @db.Text
-  text_size      String?
+  font_size      String?
   paragraph_size String?
   text_position  String?
   image_url     String? @db.Text
   image_width    Int?
   image_height   Int?
-  image_position String?
+  entity_position String?
+  entity_title_position String?
   image_scale    String?
   table_columns  Json?
   table_data     Json?
