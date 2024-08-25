@@ -38,7 +38,7 @@ model Home_entity {
   font_size      String?
   paragraph_size String?
   text_position  String?
-  image_url     String? @db.Text
+  image_path     String? @db.Text
   image_width    Int?
   image_height   Int?
   entity_position String?

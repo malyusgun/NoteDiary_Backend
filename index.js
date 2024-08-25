@@ -2,7 +2,8 @@ import 'dotenv/config';
 import { WebSocketServer } from 'ws';
 import HomeController from './controllers/homeController.js';
 
-const PORT = process.env.PORT || 5432;
+const PORT = process.env.PORT || 5000;
+const FILES_PORT = process.env.FILES_PORT || 5001;
 
 const users = new Set();
 
@@ -13,89 +14,80 @@ const wss = new WebSocketServer(
   () => console.log(`Started listen on port ${PORT}`)
 );
 
+const filesWss = new WebSocketServer(
+  {
+    port: FILES_PORT
+  },
+  () => console.log(`Started listen on port ${FILES_PORT}`)
+);
+
 wss.on('connection', (ws) => {
   users.add(ws);
   ws.id = Date.now();
   ws.on('message', async (req) => {
     req = JSON.parse(req);
+    console.log('req: ', req);
     switch (req.event) {
       case 'getHomeEntities':
         const getHomeEntitiesData = await HomeController.getEntities();
-        wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              event: 'getHomeEntities',
-              data: getHomeEntitiesData
-            })
-          );
+        getHomeEntitiesData.entitiesImages.forEach((entityBlob) => {
+          submitFilesToUsers(entityBlob);
         });
+        submitToUsers('getHomeEntities', getHomeEntitiesData.entities);
         break;
       case 'getHomeBackgroundUrl':
         const homeBackgroundUrl = await HomeController.getHomeBackgroundUrl();
-        wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              event: 'getHomeBackgroundUrl',
-              data: homeBackgroundUrl
-            })
-          );
-        });
+        submitToUsers('getHomeBackgroundUrl', homeBackgroundUrl);
         break;
       case 'createHomeEntity':
         const createdHomeEntity = await HomeController.createEntity(req);
-        wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              event: 'createHomeEntity',
-              data: createdHomeEntity
-            })
-          );
-        });
+        submitToUsers('createHomeEntity', createdHomeEntity);
         break;
       case 'editHomeEntity':
         const editedHomeEntity = await HomeController.editEntity(req);
-        wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              event: 'editHomeEntity',
-              data: editedHomeEntity
-            })
-          );
-        });
+        submitToUsers('editHomeEntity', editedHomeEntity);
         break;
       case 'deleteHomeEntity':
         const deletedHomeEntity = await HomeController.deleteEntity(req);
-        wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              event: 'deleteHomeEntity',
-              data: deletedHomeEntity
-            })
-          );
-        });
+        submitToUsers('deleteHomeEntity', deletedHomeEntity);
         break;
       case 'changeOrderHomeEntity':
         await HomeController.changeOrderEntity(req);
-        wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              event: 'changeOrderHomeEntity',
-              data: { ...req.body }
-            })
-          );
-        });
+        submitToUsers('changeOrderHomeEntity', { ...req.body });
         break;
       case 'changeHomeBackgroundUrl':
         await HomeController.changeHomeBackgroundUrl(req);
-        wss.clients.forEach((client) => {
-          client.send(
-            JSON.stringify({
-              event: 'changeHomeBackgroundUrl',
-              data: { ...req.body }
-            })
-          );
-        });
+        submitToUsers('changeHomeBackgroundUrl', { ...req.body });
         break;
     }
   });
 });
+
+filesWss.on('connection', (ws) => {
+  users.add(ws);
+  console.log('users: ', users.size);
+  ws.on('message', async (req) => {
+    console.log('req', req);
+    await HomeController.createImageEntity(req);
+    submitToUsers('createImageHomeEntity', 'Post data of image, please');
+  });
+});
+
+function submitToUsers(event, data) {
+  console.log('data in submitToUsers:', data);
+  wss.clients.forEach((client) => {
+    client.send(
+      JSON.stringify({
+        event: event,
+        data: data
+      })
+    );
+  });
+}
+
+function submitFilesToUsers(data) {
+  console.log('submitFilesToUsers', data);
+  filesWss.clients.forEach((client) => {
+    client.send(data);
+  });
+}

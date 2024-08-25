@@ -6,9 +6,26 @@ const prisma = new PrismaClient();
 
 class HomeService {
   async getEntities() {
-    return prisma.home_entity.findMany({
+    const entitiesDB = await prisma.home_entity.findMany({
       orderBy: [{ entity_order: 'asc' }]
     });
+    const entitiesImages = [];
+    const entitiesToReturn = entitiesDB.map((entity) => {
+      if (!entity.image_width) return entity;
+      const imagePath = path.join(path.resolve(), `/public/images/${entity.entity_uuid}.jpg`);
+      const file = fs.readFileSync(imagePath);
+      console.log('file in readFile: ', file);
+      // const blob = new Blob([file], { type: 'image/jpeg' });
+      // console.log('blob: ', blob);
+      const buffer = Buffer.from(file, 'base64');
+      entitiesImages.push(buffer);
+      console.log('entitiesImages', entitiesImages);
+      return entity;
+    });
+    return {
+      entities: entitiesToReturn,
+      entitiesImages: entitiesImages
+    };
   }
   async getHomeBackgroundUrl() {
     return prisma.setting.findFirst({
@@ -18,19 +35,27 @@ class HomeService {
     });
   }
   async createEntity(body) {
-    let pathOfImage = '';
-    if (body.image_url) {
-      console.log('body.image_url', body.image_url);
-      // const response = await fetch(body.image_url);
-      // const blob = await body.image_url.blob();
-      const arrayBuffer = new ArrayBuffer(body.image_url);
-      // const arrayBuffer = await body.image_url.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      pathOfImage = path.join(path.resolve(), `/public/images/${body.entity_uuid}`);
-      console.log('pathOfImage', pathOfImage);
-      fs.writeFile(pathOfImage, buffer, () => console.log('Written!'));
+    if (body.image_blob) {
+      const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
+      let newImagePath = imagePath.split('\\');
+      newImagePath.splice(-1);
+      console.log('1 newImagePath', newImagePath);
+      newImagePath.push(`${body.entity_uuid}.jpg`);
+      console.log('2 newImagePath', newImagePath);
+      newImagePath = newImagePath.join('\\');
+      console.log('3 newImagePath', newImagePath);
+      fs.rename(imagePath, newImagePath, function (err) {
+        if (err) console.log('ERROR in fs.rename: ' + err);
+      });
+      delete body.image_blob;
+      body.image_path = newImagePath;
+      console.log('body image: ', body);
     }
-    return prisma.home_entity.create({ data: { ...body, image_url: pathOfImage } });
+    return prisma.home_entity.create({ data: { ...body } });
+  }
+  async createImageEntity(body) {
+    const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
+    fs.writeFileSync(imagePath, body);
   }
   async editEntity(body) {
     return prisma.home_entity.update({

@@ -24,6 +24,13 @@ class HomeController {
       console.log(error);
     }
   }
+  async createImageEntity(req) {
+    try {
+      return await HomeService.createImageEntity(req);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   async editEntity(req) {
     try {
       return await HomeService.editEntity(req.body);
