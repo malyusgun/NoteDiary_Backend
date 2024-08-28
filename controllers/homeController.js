@@ -1,17 +1,31 @@
 import HomeService from '../services/homeService.js';
 
 class HomeController {
-  async getEntities() {
+  async getHomeBackground() {
     try {
-      return await HomeService.getEntities();
+      return await HomeService.getHomeBackground();
     } catch (error) {
       console.log(error);
       return error;
     }
   }
-  async getHomeBackgroundUrl() {
+  async changeHomeBackground(req) {
     try {
-      return await HomeService.getHomeBackgroundUrl();
+      return await HomeService.changeHomeBackground(req.body);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async removeHomeBackground() {
+    try {
+      await HomeService.removeHomeBackground();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async getEntities() {
+    try {
+      return await HomeService.getEntities();
     } catch (error) {
       console.log(error);
       return error;
@@ -24,9 +38,9 @@ class HomeController {
       console.log(error);
     }
   }
-  async createImageEntity(req) {
+  async createImage(req) {
     try {
-      return await HomeService.createImageEntity(req);
+      return await HomeService.createImage(req);
     } catch (error) {
       console.log(error);
     }
@@ -34,6 +48,13 @@ class HomeController {
   async editEntity(req) {
     try {
       return await HomeService.editEntity(req.body);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async cropImage(req) {
+    try {
+      return await HomeService.cropImage(req.body);
     } catch (error) {
       console.log(error);
     }
@@ -48,13 +69,6 @@ class HomeController {
   async changeOrderEntity(req) {
     try {
       return await HomeService.changeOrderEntity(req.body);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async changeHomeBackgroundUrl(req) {
-    try {
-      return await HomeService.changeHomeBackgroundUrl(req.body);
     } catch (error) {
       console.log(error);
     }

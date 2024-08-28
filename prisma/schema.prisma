@@ -12,7 +12,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   // при запуске с рабочего ноутбука
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -24,13 +24,11 @@ model User {
   email         String?
   phone_number  String?
   settings      Json?
-  home_entities Home_entity[]
+  home_entities Json?
 }
 
 model Home_entity {
   entity_uuid      String @id @default(uuid())
-  entity_user    User?   @relation(fields: [user_nick_name], references: [nick_name])
-  user_nick_name String? @unique
   entity_order   Int    @default(autoincrement())
   entity_type    String
   title          String?
@@ -49,6 +47,7 @@ model Home_entity {
 }
 
 model Setting {
+  setting_uuid String @id @default(uuid())
   setting_name String @unique
   setting_value String
 }

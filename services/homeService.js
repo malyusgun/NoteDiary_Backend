@@ -5,6 +5,55 @@ import path from 'node:path';
 const prisma = new PrismaClient();
 
 class HomeService {
+  async getHomeBackground() {
+    const backgroundInfo = await prisma.setting.findFirst({
+      where: {
+        setting_name: 'homeBackground'
+      }
+    });
+    if (backgroundInfo?.setting_value) {
+      const file = fs.readFileSync(backgroundInfo.setting_value);
+      return Buffer.from(file, 'base64');
+    }
+  }
+  async changeHomeBackground(body) {
+    console.log('body in changeHomeBackground: ', body);
+    const response = await fetch(body.setting_value);
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const extension = body.extension.split('/')[1];
+    const imagePath = path.join(path.resolve(), `/public/images/backgrounds/homeBackground.jpg`);
+    fs.writeFileSync(imagePath, buffer);
+
+    delete body.extension;
+    body.setting_value = imagePath;
+    const homeBackground = await prisma.setting.findFirst({
+      where: {
+        setting_name: 'homeBackground'
+      }
+    });
+    if (homeBackground) {
+      return prisma.setting.update({
+        where: {
+          setting_name: 'homeBackground'
+        },
+        data: { ...body }
+      });
+    }
+    return prisma.setting.create({ data: { ...body } });
+  }
+  async removeHomeBackground() {
+    const imagePath = path.join(path.resolve(), `/public/images/backgrounds/homeBackground.jpg`);
+    fs.unlink(imagePath, (err) => {
+      if (err) throw err;
+    });
+    await prisma.setting.delete({
+      where: {
+        setting_name: 'homeBackground'
+      }
+    });
+  }
   async getEntities() {
     const entitiesDB = await prisma.home_entity.findMany({
       orderBy: [{ entity_order: 'asc' }]
@@ -14,12 +63,12 @@ class HomeService {
       if (!entity.image_width) return entity;
       const imagePath = path.join(path.resolve(), `/public/images/${entity.entity_uuid}.jpg`);
       const file = fs.readFileSync(imagePath);
-      console.log('file in readFile: ', file);
+      // console.log('file in readFile: ', file);
       // const blob = new Blob([file], { type: 'image/jpeg' });
       // console.log('blob: ', blob);
       const buffer = Buffer.from(file, 'base64');
       entitiesImages.push(buffer);
-      console.log('entitiesImages', entitiesImages);
+      // console.log('entitiesImages', entitiesImages);
       return entity;
     });
     return {
@@ -27,35 +76,44 @@ class HomeService {
       entitiesImages: entitiesImages
     };
   }
-  async getHomeBackgroundUrl() {
-    return prisma.setting.findFirst({
-      where: {
-        setting_name: 'homeBackgroundUrl'
-      }
-    });
-  }
   async createEntity(body) {
-    if (body.image_blob) {
+    if (body.image_buffer) {
       const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
-      let newImagePath = imagePath.split('\\');
+      let newImagePath = imagePath.split('/');
       newImagePath.splice(-1);
-      console.log('1 newImagePath', newImagePath);
       newImagePath.push(`${body.entity_uuid}.jpg`);
-      console.log('2 newImagePath', newImagePath);
-      newImagePath = newImagePath.join('\\');
-      console.log('3 newImagePath', newImagePath);
+      newImagePath = newImagePath.join('/');
+      console.log('imagePath', imagePath);
+      console.log('newImagePath', newImagePath);
       fs.rename(imagePath, newImagePath, function (err) {
         if (err) console.log('ERROR in fs.rename: ' + err);
       });
-      delete body.image_blob;
+      delete body.image_buffer;
       body.image_path = newImagePath;
       console.log('body image: ', body);
     }
     return prisma.home_entity.create({ data: { ...body } });
   }
-  async createImageEntity(body) {
+  // единственная функция, срабатывающая по сокету для файлов
+  async createImage(body) {
     const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
     fs.writeFileSync(imagePath, body);
+  }
+  async cropImage(body) {
+    const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
+    fs.unlink(body.image_path, (err) => {
+      if (err) throw err;
+    });
+    fs.rename(imagePath, body.image_path, function (err) {
+      if (err) throw err;
+    });
+    delete body.imageUrl;
+    return prisma.home_entity.update({
+      where: {
+        entity_uuid: body.entity_uuid
+      },
+      data: { ...body }
+    });
   }
   async editEntity(body) {
     return prisma.home_entity.update({
@@ -76,6 +134,10 @@ class HomeService {
         entity_uuid: body.entity_uuid
       }
     });
+    if (body.image_width)
+      fs.unlink(body.image_path, (err) => {
+        if (err) throw err;
+      });
     return deletedEntity;
   }
   async changeOrderEntity(body) {
@@ -104,22 +166,6 @@ class HomeService {
       }
     });
     return body;
-  }
-  async changeHomeBackgroundUrl(body) {
-    const homeBackgroundUrl = await prisma.setting.findFirst({
-      where: {
-        setting_name: 'homeBackgroundUrl'
-      }
-    });
-    if (homeBackgroundUrl) {
-      return prisma.setting.update({
-        where: {
-          setting_name: 'homeBackgroundUrl'
-        },
-        data: { ...body }
-      });
-    }
-    return prisma.setting.create({ data: { ...body } });
   }
 }
 
