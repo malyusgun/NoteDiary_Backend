@@ -17,7 +17,6 @@ class HomeService {
     }
   }
   async changeHomeBackground(body) {
-    console.log('body in changeHomeBackground: ', body);
     const response = await fetch(body.setting_value);
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
@@ -63,12 +62,8 @@ class HomeService {
       if (!entity.image_width) return entity;
       const imagePath = path.join(path.resolve(), `/public/images/${entity.entity_uuid}.jpg`);
       const file = fs.readFileSync(imagePath);
-      // console.log('file in readFile: ', file);
-      // const blob = new Blob([file], { type: 'image/jpeg' });
-      // console.log('blob: ', blob);
       const buffer = Buffer.from(file, 'base64');
       entitiesImages.push(buffer);
-      // console.log('entitiesImages', entitiesImages);
       return entity;
     });
     return {
@@ -83,14 +78,11 @@ class HomeService {
       newImagePath.splice(-1);
       newImagePath.push(`${body.entity_uuid}.jpg`);
       newImagePath = newImagePath.join('/');
-      console.log('imagePath', imagePath);
-      console.log('newImagePath', newImagePath);
       fs.rename(imagePath, newImagePath, function (err) {
         if (err) console.log('ERROR in fs.rename: ' + err);
       });
       delete body.image_buffer;
       body.image_path = newImagePath;
-      console.log('body image: ', body);
     }
     return prisma.home_entity.create({ data: { ...body } });
   }
