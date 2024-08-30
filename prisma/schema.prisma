@@ -31,6 +31,8 @@ model Home_entity {
   entity_uuid      String @id @default(uuid())
   entity_order   Int    @default(autoincrement())
   entity_type    String
+  divider_height Int?
+  divider_type   String?
   title          String?
   text           String? @db.Text
   font_size      String?
