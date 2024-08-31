@@ -21,7 +21,6 @@ class HomeService {
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const extension = body.extension.split('/')[1];
     const imagePath = path.join(path.resolve(), `/public/images/backgrounds/homeBackground.jpg`);
     fs.writeFileSync(imagePath, buffer);
 
@@ -74,10 +73,19 @@ class HomeService {
   async createEntity(body) {
     if (body.image_buffer) {
       const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
-      let newImagePath = imagePath.split('/');
+      let newImagePath;
+      if (process.platform.includes('win')) {
+        newImagePath = imagePath.split('\\');
+      } else {
+        newImagePath = imagePath.split('/');
+      }
       newImagePath.splice(-1);
       newImagePath.push(`${body.entity_uuid}.jpg`);
-      newImagePath = newImagePath.join('/');
+      if (process.platform.includes('win')) {
+        newImagePath = newImagePath.join('\\');
+      } else {
+        newImagePath = newImagePath.join('/');
+      }
       fs.rename(imagePath, newImagePath, function (err) {
         if (err) console.log('ERROR in fs.rename: ' + err);
       });
