@@ -1,5 +1,5 @@
-import { bot } from '../telegramBot/index.js';
-import { validateMessage } from '../helpers/index.js';
+import { bot } from '../telegramBot';
+import { validateMessage } from '../helpers';
 import path from 'node:path';
 import * as fs from 'node:fs';
 

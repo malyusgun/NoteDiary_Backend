@@ -1,14 +1,14 @@
 import 'dotenv/config';
 import { WebSocketServer } from 'ws';
-import HomeController from './controllers/homeController.js';
-import { websocketRoute } from './routes/websocket.js';
-import { connectBot } from './telegramBot/index.js';
+import EntitiesController from './controllers/entitiesController';
+import { websocketRoute } from './routes/websocket';
+import { connectBot } from './telegramBot';
 
 await connectBot();
 
 const users = new Set();
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 const FILES_PORT = process.env.FILES_PORT || 5001;
 
 const wss = new WebSocketServer(
@@ -34,14 +34,14 @@ const filesWss = new WebSocketServer(
 );
 filesWss.on('connection', (ws) => {
   users.add(ws);
-  console.log('users: ', users.size);
-  ws.on('message', async (req) => {
-    await HomeController.createImage(req);
-    submitToUsers('createImageHomeEntity', '');
+  console.log('users wss: ', users.size);
+  ws.on('message', async (req: Buffer) => {
+    await EntitiesController.createImage(req);
+    submitToUsers('createImageEntity', '');
   });
 });
 
-export function submitToUsers(event, data) {
+export function submitToUsers(event: string, data: any) {
   wss.clients.forEach((client) => {
     client.send(
       JSON.stringify({
@@ -51,7 +51,7 @@ export function submitToUsers(event, data) {
     );
   });
 }
-export function submitFilesToUsers(data) {
+export function submitFilesToUsers(data: any) {
   filesWss.clients.forEach((client) => {
     client.send(data);
   });
