@@ -16,40 +16,84 @@ datasource db {
 }
 
 model User {
-  user_uuid       String        @id @default(uuid())
+  user_uuid     String        @id @default(uuid())
   nick_name     String        @unique
+  password      String
+  email         String
   first_name    String?
   middle_name   String?
   last_name     String?
-  email         String?
-  phone_number  String?
   settings      Json?
-  home_entities Json?
+  pages_uuid    Json?
 }
 
-model Home_entity {
-  entity_uuid      String @id @default(uuid())
-  entity_order   Int    @default(autoincrement())
-  entity_type    String
-  divider_height Int?
-  divider_type   String?
-  title          String?
-  text           String? @db.Text
-  font_size      String?
-  paragraph_size String?
-  text_position  String?
-  image_path     String? @db.Text
-  image_width    Int?
-  image_height   Int?
-  entity_position String?
+model Page {
+  user_uuid             String
+  page_uuid             String @id @default(uuid())
+  page_title            String
+  page_icon             String
+  page_navigation_order String
+  background_path       String? @db.Text
+  page_entities         Json?
+}
+
+model Entity {
+  entity_uuid           String @id @default(uuid())
+  entity_order          Int    @default(autoincrement())
+  entity_type           String
+  title                 String?
+  text                  String? @db.Text
+  font_size             String?
+  paragraph_size        String?
+  text_position         String?
+  image_path            String? @db.Text
+  image_width           Int?
+  image_height          Int?
+  entity_position       String?
   entity_title_position String?
-  image_scale    String?
-  table_columns  Json?
-  table_data     Json?
+  image_scale           String?
+  table_columns         Json?
+  table_data            Json?
 }
 
-model Setting {
-  setting_uuid String @id @default(uuid())
-  setting_name String @unique
-  setting_value String
+model Divider {
+  entity_type           String
+  entity_uuid           String @id @default(uuid())
+  entity_order          Int
+  divider_height        Int?
+  divider_type          String?
 }
+
+model Paragraph {
+  entity_type           String
+  entity_uuid           String @id @default(uuid())
+  entity_order          Int
+  title                 String?
+  text                  String? @db.Text
+  font_size             String?
+  paragraph_size        String?
+  entity_position       String?
+  entity_title_position String?
+}
+
+model Image {
+  entity_type           String
+  entity_uuid           String @id @default(uuid())
+  entity_order          Int
+  image_path            String? @db.Text
+  image_width           Int?
+  image_height          Int?
+  image_scale           String?
+  title                 String?
+  text                  String? @db.Text
+  font_size             String?
+  paragraph_size        String?
+  entity_title_position String?
+  text_position         String?
+  entity_position       String?
+}
+// model Setting {
+//   setting_uuid  String @id @default(uuid())
+//   setting_name  String @unique
+//   setting_value String
+// }

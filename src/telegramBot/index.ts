@@ -1,7 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
-import * as route from '../routes/telegramBot.js';
+import * as route from '../routes/telegramBot';
 
-export const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
+export const bot = new TelegramBot(process.env.TELEGRAM_TOKEN!, { polling: true });
 
 export const connectBot = async () => {
   await bot.setMyCommands([
@@ -11,7 +11,7 @@ export const connectBot = async () => {
 
   bot.on('message', async (message) => {
     const chatId = message.chat.id;
-    const text = message.text;
+    const text = message.text!;
     if (text === '/start') {
       await route.sendMessageOnStart(chatId);
     }
@@ -34,7 +34,7 @@ export const connectBot = async () => {
     }
   });
   bot.on('callback_query', async (req) => {
-    const chatId = req.message.chat.id;
+    const chatId = req.message!.chat.id;
     const data = req.data;
 
     if (data === '/start') {
