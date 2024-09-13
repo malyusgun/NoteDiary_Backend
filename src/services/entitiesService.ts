@@ -117,6 +117,7 @@ class EntitiesService {
       fs.unlink(body.image_path, (err) => {
         if (err) throw err;
       });
+    await PagesService.deletePageEntity(body.page_uuid, body.entity_uuid);
     return {
       entity_uuid: body.entity_uuid
     };
