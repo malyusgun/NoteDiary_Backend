@@ -92,6 +92,22 @@ class PagesService {
       }
     });
   }
+  async deletePageEntity(page_uuid: string, entity_uuid: string) {
+    const newState = await prisma.page.findFirst({
+      where: {
+        page_uuid: page_uuid
+      }
+    });
+    newState.page_entities = newState.page_entities.filter(
+      (entity) => entity.entity_uuid !== entity_uuid
+    );
+    await prisma.page.update({
+      data: { ...newState },
+      where: {
+        page_uuid: page_uuid
+      }
+    });
+  }
   async deletePageBackground(page_uuid: string) {
     const imagePath = path.join(path.resolve(), `/public/images/backgrounds/homeBackground.jpg`);
     fs.unlink(imagePath, (err) => {
