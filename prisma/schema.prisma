@@ -48,7 +48,8 @@ model Entity {
   text_position         String?
   image_path            String? @db.Text
   image_width           Int?
-  image_height          Int?
+  file_width            Int?
+  file_height           Int?
   entity_position       String?
   entity_title_position String?
   image_scale           String?
@@ -82,7 +83,11 @@ model Image {
   entity_order          Int
   image_path            String? @db.Text
   image_width           Int?
-  image_height          Int?
+  file_width_initial    Int
+  file_height_initial   Int
+  image_url_initial     String?
+  file_width            Int?
+  file_height           Int?
   image_scale           String?
   title                 String?
   text                  String? @db.Text

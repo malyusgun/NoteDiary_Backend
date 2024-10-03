@@ -39,6 +39,13 @@ class EntitiesController {
       console.log(error);
     }
   }
+  async returnOriginalSizeImage(req: IWSRequest<'returnOriginalSizeImage', IEntity>) {
+    try {
+      return await EntitiesService.returnOriginalSizeImage(req.body);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   async changeEntitiesOrder(req: IChangeEntitiesOrder) {
     try {
       return await EntitiesService.changeEntitiesOrder(req.body);

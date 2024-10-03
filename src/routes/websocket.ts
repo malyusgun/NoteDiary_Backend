@@ -63,6 +63,12 @@ export const websocketRoute = async (req: any) => {
       submitToUsers('editEntity', editedEntity);
       break;
     }
+    case 'returnOriginalSizeImage': {
+      const result = await EntitiesController!.returnOriginalSizeImage(req);
+      submitFilesToUsers(result.buffer);
+      submitToUsers('returnOriginalSizeImage', result.entity);
+      break;
+    }
     case 'changeEntitiesOrder':
       const changedEntitiesOrders = await EntitiesController.changeEntitiesOrder(req);
       submitToUsers('changeEntitiesOrder', changedEntitiesOrders);

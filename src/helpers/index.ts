@@ -1,5 +1,6 @@
 import { bot } from '../telegramBot';
 import { PrismaClient } from '@prisma/client';
+import path from 'node:path';
 
 export const validateMessage = async (
   response: any,
@@ -57,6 +58,27 @@ export const getPrismaEntity = async (body: any) => {
     //     });
   }
 };
+export const getImagePathByUuid = (entity_uuid: string, isOriginal?: boolean) => {
+  const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
+  let newImagePath;
+  if (process.platform.includes('win')) {
+    newImagePath = imagePath.split('\\');
+  } else {
+    newImagePath = imagePath.split('/');
+  }
+  newImagePath.splice(-1);
+  if (isOriginal) {
+    newImagePath.push(`original${entity_uuid}.jpg`);
+  } else {
+    newImagePath.push(`${entity_uuid}.jpg`);
+  }
+  if (process.platform.includes('win')) {
+    newImagePath = newImagePath.join('\\');
+  } else {
+    newImagePath = newImagePath.join('/');
+  }
+  return newImagePath;
+};
 export const updatePrismaEntity = async (body: any) => {
   switch (body.entity_type) {
     case 'divider':
@@ -74,7 +96,7 @@ export const updatePrismaEntity = async (body: any) => {
         data: { ...body }
       });
     case 'image':
-      delete body.imageUrl;
+      delete body.image_url;
       return prisma.image.update({
         where: {
           entity_uuid: body.entity_uuid
