@@ -10,9 +10,9 @@ class EntitiesController {
       console.log(error);
     }
   }
-  async createImage(req: Buffer) {
+  async createImage(req: Buffer, isCropImageNow: boolean) {
     try {
-      return await EntitiesService.createImage(req);
+      return await EntitiesService.createImage(req, isCropImageNow);
     } catch (error) {
       console.log(error);
     }

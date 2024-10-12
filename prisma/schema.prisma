@@ -82,10 +82,11 @@ model Image {
   entity_uuid           String @id @default(uuid())
   entity_order          Int
   image_path            String? @db.Text
-  image_width           Int?
+  image_url_initial     String?
+  image_width_initial   Int
   file_width_initial    Int
   file_height_initial   Int
-  image_url_initial     String?
+  image_width           Int?
   file_width            Int?
   file_height           Int?
   image_scale           String?

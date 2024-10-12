@@ -59,8 +59,7 @@ export const websocketRoute = async (req: any) => {
       break;
     }
     case 'cropImage': {
-      const editedEntity = await EntitiesController.cropImage(req);
-      submitToUsers('editEntity', editedEntity);
+      await EntitiesController.cropImage(req);
       break;
     }
     case 'returnOriginalSizeImage': {

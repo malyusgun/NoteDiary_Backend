@@ -223,25 +223,3 @@ export const onSuggestionResponse = async (chatId, suggestion) => {
   fs.writeFileSync(imagePath, suggestion);
   await sendMessageOnStart(chatId);
 };
-// export const sendMessageOn = async (chatId) => {
-//   await bot.sendMessage(chatId, 'Что Вас интересует?', {
-//     reply_markup: {
-//       inline_keyboard: [
-//         [{ text: 'Параграфы', callback_data: '/textInfo' }],
-//         [{ text: 'Изображения', callback_data: '/imageInfo' }],
-//         [{ text: 'Назад', callback_data: '/start' }]
-//       ]
-//     }
-//   });
-// };
-// export const sendMessageOn = async (chatId) => {
-//   await bot.sendMessage(chatId, 'Что Вас интересует?', {
-//     reply_markup: {
-//       inline_keyboard: [
-//         [{ text: 'Параграфы', callback_data: '/textInfo' }],
-//         [{ text: 'Изображения', callback_data: '/imageInfo' }],
-//         [{ text: 'Назад', callback_data: '/start' }]
-//       ]
-//     }
-//   });
-// };
