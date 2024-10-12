@@ -10,9 +10,9 @@ class EntitiesController {
       console.log(error);
     }
   }
-  async createImage(req: Buffer) {
+  async createImage(req: Buffer, isCropImageNow: boolean) {
     try {
-      return await EntitiesService.createImage(req);
+      return await EntitiesService.createImage(req, isCropImageNow);
     } catch (error) {
       console.log(error);
     }
@@ -35,6 +35,13 @@ class EntitiesController {
   async cropImage(req: IWSRequest<'cropImage', IEntity>) {
     try {
       return await EntitiesService.cropImage(req.body);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async returnOriginalSizeImage(req: IWSRequest<'returnOriginalSizeImage', IEntity>) {
+    try {
+      return await EntitiesService.returnOriginalSizeImage(req.body);
     } catch (error) {
       console.log(error);
     }

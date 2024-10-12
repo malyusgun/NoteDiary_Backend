@@ -1,15 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'node:fs';
 import path from 'node:path';
-import { IEntity, IPageEntity } from '../interface/database';
+import { IEntity } from '../interface/database';
 import { randomUUID } from 'node:crypto';
 import {
   createPrismaEntity,
-  updatePrismaEntity,
+  deletePrismaEntity,
+  getImagePathByUuid,
   getPrismaEntity,
-  deletePrismaEntity
+  updatePrismaEntity
 } from '../helpers';
 import PagesService from './pagesService';
+
 const prisma = new PrismaClient();
 
 class EntitiesService {
@@ -17,26 +19,20 @@ class EntitiesService {
     if (!body.entity_uuid) body.entity_uuid = randomUUID();
     if (body?.image_buffer) {
       const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
-      let newImagePath;
-      if (process.platform.includes('win')) {
-        newImagePath = imagePath.split('\\');
-      } else {
-        newImagePath = imagePath.split('/');
-      }
-      newImagePath.splice(-1);
-      console.log('body in createEntity: ', body, 'body.entity_uuid: ', body.entity_uuid);
-      newImagePath.push(`${body.entity_uuid}.jpg`);
-      if (process.platform.includes('win')) {
-        newImagePath = newImagePath.join('\\');
-      } else {
-        newImagePath = newImagePath.join('/');
-      }
+      const originalImagePath = path.join(path.resolve(), `/public/images/originalImage.jpg`);
+      const newImagePath = getImagePathByUuid(body.entity_uuid);
+      const newOriginalImagePath = getImagePathByUuid(body.entity_uuid, true);
+
       fs.rename(imagePath, newImagePath, function (err) {
+        if (err) console.log('ERROR in fs.rename: ' + err);
+      });
+      fs.rename(originalImagePath, newOriginalImagePath, function (err) {
         if (err) console.log('ERROR in fs.rename: ' + err);
       });
       delete body.image_buffer;
       body.image_path = newImagePath;
     }
+
     const page_uuid = body.page_uuid!;
     delete body.page_uuid;
     const createdEntity = createPrismaEntity(body);
@@ -44,7 +40,11 @@ class EntitiesService {
     return createdEntity;
   }
   // единственная функция, срабатывающая по сокету для файлов
-  async createImage(body: Buffer) {
+  async createImage(body: Buffer, isCropImageNow: boolean) {
+    if (!isCropImageNow) {
+      const originalImagePath = path.join(path.resolve(), `/public/images/originalImage.jpg`);
+      fs.writeFileSync(originalImagePath, body);
+    }
     const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
     fs.writeFileSync(imagePath, body);
   }
@@ -68,6 +68,13 @@ class EntitiesService {
         const file = fs.readFileSync(imagePath);
         const buffer = Buffer.from(file);
         entitiesImages.push(buffer);
+        const originalImagePath = path.join(
+          path.resolve(),
+          `/public/images/original${entity.entity_uuid}.jpg`
+        );
+        const originalFile = fs.readFileSync(originalImagePath);
+        const originalBuffer = Buffer.from(originalFile);
+        entitiesImages.push(originalBuffer);
       });
       return {
         entities: entitiesToReturn,
@@ -81,19 +88,32 @@ class EntitiesService {
   }
   async cropImage(body: IEntity) {
     const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
-    fs.unlink(body.image_path!, (err) => {
-      if (err) throw err;
-    });
-    fs.rename(imagePath, body.image_path!, function (err) {
-      if (err) throw err;
-    });
-    delete body.imageUrl;
-    return prisma.image.update({
+    const timer = setInterval(() => {
+      if (fs.existsSync(imagePath)) {
+        clearInterval(timer);
+        fs.unlinkSync(body.image_path!);
+        fs.renameSync(imagePath, body.image_path!);
+        delete body.image_url;
+        return prisma.image.update({
+          where: {
+            entity_uuid: body.entity_uuid
+          },
+          data: { ...body }
+        });
+      }
+    }, 50);
+  }
+  async returnOriginalSizeImage(body: IEntity) {
+    body.image_path = getImagePathByUuid(body.entity_uuid, true);
+    const newState = await prisma.image.update({
       where: {
         entity_uuid: body.entity_uuid
       },
       data: { ...body }
     });
+    const file = fs.readFileSync(body.image_path);
+    const buffer = Buffer.from(file);
+    return { buffer: [buffer], entity: newState };
   }
   async editEntity(body: IEntity) {
     return updatePrismaEntity(body);
@@ -113,10 +133,17 @@ class EntitiesService {
   }
   async deleteEntity(body: IEntity) {
     await deletePrismaEntity(body);
-    if (body.image_path)
+    if (body.image_path) {
       fs.unlink(body.image_path, (err) => {
         if (err) throw err;
       });
+      const originalImagePath = getImagePathByUuid(body.entity_uuid, true);
+      if (fs.existsSync(originalImagePath)) {
+        fs.unlink(originalImagePath, (err) => {
+          if (err) throw err;
+        });
+      }
+    }
     await PagesService.deletePageEntity(body.page_uuid, body.entity_uuid);
     return {
       entity_uuid: body.entity_uuid

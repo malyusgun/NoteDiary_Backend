@@ -7,6 +7,7 @@ import { connectBot } from './telegramBot';
 await connectBot();
 
 const users = new Set();
+let isCropImageNow: boolean = false;
 
 const PORT = Number(process.env.PORT) || 5000;
 const FILES_PORT = process.env.FILES_PORT || 5001;
@@ -22,6 +23,7 @@ wss.on('connection', (ws) => {
   ws.id = Date.now();
   ws.on('message', async (req) => {
     req = JSON.parse(req);
+    if (req.event === 'setCropNow') isCropImageNow = true;
     await websocketRoute(req);
   });
 });
@@ -36,8 +38,12 @@ filesWss.on('connection', (ws) => {
   users.add(ws);
   console.log('users wss: ', users.size);
   ws.on('message', async (req: Buffer) => {
-    await EntitiesController.createImage(req);
-    submitToUsers('createImageEntity', '');
+    await EntitiesController.createImage(req, isCropImageNow);
+    if (!isCropImageNow) {
+      submitToUsers('createImageEntity', '');
+    } else {
+      isCropImageNow = false;
+    }
   });
 });
 

@@ -16,7 +16,7 @@ export interface IEntity {
   text_position?: string | null;
   image_buffer?: string;
   image_path?: string;
-  imageUrl?: string;
+  image_url?: string;
   image_width?: number;
   image_height?: number;
   entity_position?: string;
