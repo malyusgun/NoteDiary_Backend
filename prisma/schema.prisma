@@ -16,58 +16,35 @@ datasource db {
 }
 
 model User {
-  user_uuid     String        @id @default(uuid())
-  nick_name     String        @unique
-  password      String
-  email         String
-  first_name    String?
-  middle_name   String?
-  last_name     String?
-  settings      Json?
-  pages_uuid    Json?
+  user_uuid      String @id @default(uuid())
+  nick_name      String
+  password       String
+  email          String
+  favorite_color String
+  user_sheets    Json?
 }
 
-model Page {
-  user_uuid             String
-  page_uuid             String @id @default(uuid())
-  page_title            String
-  page_icon             String
-  page_navigation_order String
-  background_path       String? @db.Text
-  page_entities         Json?
-}
-
-model Entity {
-  entity_uuid           String @id @default(uuid())
-  entity_order          Int    @default(autoincrement())
-  entity_type           String
-  title                 String?
-  text                  String? @db.Text
-  font_size             String?
-  paragraph_size        String?
-  text_position         String?
-  image_path            String? @db.Text
-  image_width           Int?
-  file_width            Int?
-  file_height           Int?
-  entity_position       String?
-  entity_title_position String?
-  image_scale           String?
-  table_columns         Json?
-  table_data            Json?
+model Sheet {
+  user_uuid              String
+  sheet_uuid             String   @id @default(uuid())
+  sheet_title            String
+  sheet_icon             String
+  sheet_navigation_order String
+  background_path        String?  @db.Text
+  sheet_entities         String[]
 }
 
 model Divider {
-  entity_type           String
-  entity_uuid           String @id @default(uuid())
-  entity_order          Int
-  divider_height        Int?
-  divider_type          String?
+  entity_type    String
+  entity_uuid    String  @id @default(uuid())
+  entity_order   Int
+  divider_height Int?
+  divider_type   String?
 }
 
 model Paragraph {
   entity_type           String
-  entity_uuid           String @id @default(uuid())
+  entity_uuid           String  @id @default(uuid())
   entity_order          Int
   title                 String?
   text                  String? @db.Text
@@ -79,7 +56,7 @@ model Paragraph {
 
 model Image {
   entity_type           String
-  entity_uuid           String @id @default(uuid())
+  entity_uuid           String  @id @default(uuid())
   entity_order          Int
   image_path            String? @db.Text
   image_url_initial     String?
@@ -98,6 +75,7 @@ model Image {
   text_position         String?
   entity_position       String?
 }
+
 // model Setting {
 //   setting_uuid  String @id @default(uuid())
 //   setting_name  String @unique

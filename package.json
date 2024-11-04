@@ -1,8 +1,8 @@
 {
-  "name": "ShelfNote_backend",
+  "name": "NoteDiary_backend",
   "version": "1.0.0",
   "main": "src/index.ts",
-  "repository": "https://gl.iqdev.team/d.malygin/shelfnote_backend",
+  "repository": "https://github.com/malyusgun/NoteDiary_Backend",
   "author": "Дмитрий Малюгин <d.malygin@iqdev.digital>",
   "license": "MIT",
   "type": "module",
@@ -13,12 +13,14 @@
     "@prisma/client": "^5.18.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "express": "^4.21.1",
     "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.12.0",
-    "pg-hstore": "^2.3.4",
-    "ws": "^8.18.0"
+    "pg-hstore": "^2.3.4"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
     "@types/node": "^22.3.0",
     "@types/node-telegram-bot-api": "^0.64.7",
     "@types/ws": "^8.5.12",
@@ -27,9 +29,5 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4"
-  },
-  "volta": {
-    "node": "20.17.0",
-    "yarn": "4.5.0"
   }
 }

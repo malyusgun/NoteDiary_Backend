@@ -1,29 +1,26 @@
-export interface IWSRequest<T, B> {
-  event: T;
-  body: B;
-}
-export interface IBodyPage {
+import { ISheetDB } from './database';
+
+export interface ISheet {
   user_uuid: string;
-  page_title: string;
-  page_navigation_order?: string;
-  page_icon?: string;
-  page_uuid?: string;
-  page_entities?: string;
+  sheet_uuid?: string;
+  sheet_title: string;
+  sheet_icon?: string;
+  sheet_navigation_order?: string;
+  sheet_entities?: string[];
 }
-export interface IBodyUser {
+export interface IUser {
   nick_name: string;
   email: string;
   password: string;
-  first_name?: string;
-  middle_name?: string;
-  last_name?: string;
   user_uuid?: string;
+  favorite_color: string;
+  user_sheets: ISheetDB[];
 }
-export interface IBodyPageUuid {
-  page_uuid: string;
+export interface ISheetUuid {
+  sheet_uuid: string;
 }
-export interface IEditPageBackground {
-  page_uuid: string;
+export interface IEditSheetBackground {
+  sheet_uuid: string;
   background_url: string;
 }
 interface IEntityUuidAndOrder {
@@ -32,9 +29,6 @@ interface IEntityUuidAndOrder {
   entity_type: 'divider' | 'paragraph' | 'image' | 'table';
 }
 export interface IChangeEntitiesOrder {
-  event: 'changeEntitiesOrder';
-  body: {
-    main: IEntityUuidAndOrder;
-    target: IEntityUuidAndOrder;
-  };
+  main: IEntityUuidAndOrder;
+  target: IEntityUuidAndOrder;
 }

@@ -31,29 +31,33 @@ export const createPrismaEntity = async (body: any) => {
   }
 };
 export const getPrismaEntity = async (body: any) => {
-  switch (body.entity_type) {
+  const chunks = body.split('$');
+  const type = chunks[0];
+  const uuid = chunks[1];
+
+  switch (type) {
     case 'divider':
       return prisma.divider.findFirst({
         where: {
-          entity_uuid: body.entity_uuid
+          entity_uuid: uuid
         }
       });
     case 'paragraph':
       return prisma.paragraph.findFirst({
         where: {
-          entity_uuid: body.entity_uuid
+          entity_uuid: uuid
         }
       });
     case 'image':
       return prisma.image.findFirst({
         where: {
-          entity_uuid: body.entity_uuid
+          entity_uuid: uuid
         }
       });
     // case 'table':
     //   return prisma.table.findFirst({
     //       where: {
-    //         entity_uuid: body.entity_uuid
+    //         entity_uuid: uuid
     //       }
     //     });
   }
