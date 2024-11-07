@@ -1,6 +1,9 @@
 import { bot } from '../telegramBot';
 import { PrismaClient } from '@prisma/client';
 import path from 'node:path';
+import { IUser } from '../interfaces/requests';
+import fs from 'node:fs';
+import { IUserAuth } from '../interfaces';
 
 export const validateMessage = async (
   response: any,
@@ -18,6 +21,7 @@ export const validateMessage = async (
 };
 
 const prisma = new PrismaClient({});
+
 export const createPrismaEntity = async (body: any) => {
   switch (body.entity_type) {
     case 'divider':
@@ -30,6 +34,7 @@ export const createPrismaEntity = async (body: any) => {
     //   return prisma.table.create({ data: { ...body } });
   }
 };
+
 export const getPrismaEntity = async (body: any) => {
   const chunks = body.split('$');
   const type = chunks[0];
@@ -62,6 +67,7 @@ export const getPrismaEntity = async (body: any) => {
     //     });
   }
 };
+
 export const getImagePathByUuid = (entity_uuid: string, isOriginal?: boolean) => {
   const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
   let newImagePath;
@@ -83,6 +89,7 @@ export const getImagePathByUuid = (entity_uuid: string, isOriginal?: boolean) =>
   }
   return newImagePath;
 };
+
 export const updatePrismaEntity = async (body: any) => {
   switch (body.entity_type) {
     case 'divider':
@@ -116,6 +123,7 @@ export const updatePrismaEntity = async (body: any) => {
     //     });
   }
 };
+
 export const deletePrismaEntity = async (body: any) => {
   switch (body.entity_type) {
     case 'divider':
@@ -143,5 +151,28 @@ export const deletePrismaEntity = async (body: any) => {
     //       }
     //       }
     //     });
+  }
+};
+
+export const getUserDataFromAuthFile = (user_uuid: string): IUserAuth => {
+  const usersDataFile = path.join(path.resolve(), `/public/auth.txt`);
+  let fileContent = fs.readFileSync(usersDataFile).toString();
+  const targetChunk = fileContent.split('$').find((chunk) => chunk.includes(user_uuid))!;
+  return convertUserData(targetChunk, 'from') as IUserAuth;
+};
+
+export const convertUserData = (body: IUser | string, convertType: 'to' | 'from', code?: string) => {
+  if (convertType === 'to' && typeof body === 'object') {
+    return `${body.user_uuid}@${code}@${body.nick_name}@${body.email}@${body.password}$`;
+  }
+  if (typeof body === 'string') {
+    const chunks = body.split('@');
+    return {
+      user_uuid: chunks[0],
+      code: chunks[1],
+      nick_name: chunks[2],
+      email: chunks[3],
+      password: chunks[4]
+    };
   }
 };

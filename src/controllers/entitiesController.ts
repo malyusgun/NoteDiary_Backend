@@ -1,7 +1,6 @@
 import EntitiesService from '../services/entitiesService';
-import { ISheetUuid, IChangeEntitiesOrder, IUser } from '../interface/requests';
-import { IEntityDB } from '../interface/database';
-import UsersService from '../services/usersService';
+import { IChangeEntitiesOrder } from '../interfaces/requests';
+import { IEntityDB } from '../interfaces/database';
 import { Request, Response } from 'express';
 
 class EntitiesController {

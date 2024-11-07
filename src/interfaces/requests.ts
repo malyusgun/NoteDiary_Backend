@@ -16,18 +16,18 @@ export interface IUser {
   favorite_color: string;
   user_sheets: ISheetDB[];
 }
-export interface ISheetUuid {
-  sheet_uuid: string;
-}
+
 export interface IEditSheetBackground {
   sheet_uuid: string;
   background_url: string;
 }
+
 interface IEntityUuidAndOrder {
   entity_uuid: string;
   entity_order: number;
   entity_type: 'divider' | 'paragraph' | 'image' | 'table';
 }
+
 export interface IChangeEntitiesOrder {
   main: IEntityUuidAndOrder;
   target: IEntityUuidAndOrder;

@@ -1,32 +1,42 @@
 import EntitiesController from '../controllers/entitiesController';
-import SheetsController from '../controllers/sheetsController';
-import UsersController from '../controllers/usersController';
+import SheetController from '../controllers/sheetController';
+import UserController from '../controllers/userController';
 import { Router } from 'express';
+// @ts-ignore
+import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = Router();
 
 // users
-router.post('/users', UsersController.createUser);
-router.get('/users/:uuid', UsersController.getUser);
-router.patch('/users/:uuid', UsersController.editUser);
-router.delete('/users/:uuid', UsersController.deleteUser);
+router.post('/users/confirm', UserController.confirmMail);
+router.get('/users/:uuid/code', UserController.getConfirmMailCode);
+
+router.post('/users', authMiddleware, UserController.registration);
+router.get('/users/:uuid', authMiddleware, UserController.getUser);
+router.patch('/users/:uuid', authMiddleware, UserController.editUser);
+router.patch('/users/:uuid/refresh', authMiddleware, UserController.refreshToken);
+router.delete('/users/:uuid', authMiddleware, UserController.logout);
 
 // sheets
-router.post('/sheets', SheetsController.createSheet);
-router.get('/sheets/:uuid/background', SheetsController.getSheetBackground);
-router.patch('/sheets/:uuid', SheetsController.editSheet);
-router.patch('/sheets/:uuid/background', SheetsController.editSheetBackground);
-router.delete('/sheets/:uuid', SheetsController.deleteSheet);
-router.delete('/sheets/:uuid/background', SheetsController.deleteSheetBackground);
+router.post('/sheets', authMiddleware, SheetController.createSheet);
+router.get('/sheets/:uuid/background', authMiddleware, SheetController.getSheetBackground);
+router.patch('/sheets/:uuid', authMiddleware, SheetController.editSheet);
+router.patch('/sheets/:uuid/background', authMiddleware, SheetController.editSheetBackground);
+router.delete('/sheets/:uuid', authMiddleware, SheetController.deleteSheet);
+router.delete('/sheets/:uuid/background', authMiddleware, SheetController.deleteSheetBackground);
 
 // entities
-router.post('/sheets/:uuid/entities', EntitiesController.createEntity);
-router.get('/sheets/:uuid/entities', EntitiesController.getEntities);
-router.patch('/sheets/:uuid/entities', EntitiesController.changeEntitiesOrder);
-router.patch('/sheets/:uuid/entities/:uuid', EntitiesController.editEntity);
-router.patch('/sheets/:uuid/entities/crop/:uuid', EntitiesController.cropImage);
-router.patch('/sheets/:uuid/entities/defaultImageSize/:uuid', EntitiesController.returnOriginalSizeImage);
-router.delete('/sheets/:uuid/entities/:uuid', EntitiesController.deleteEntity);
+router.post('/sheets/:uuid/entities', authMiddleware, EntitiesController.createEntity);
+router.get('/sheets/:uuid/entities', authMiddleware, EntitiesController.getEntities);
+router.patch('/sheets/:uuid/entities', authMiddleware, EntitiesController.changeEntitiesOrder);
+router.patch('/sheets/:uuid/entities/:uuid', authMiddleware, EntitiesController.editEntity);
+router.patch('/sheets/:uuid/entities/crop/:uuid', authMiddleware, EntitiesController.cropImage);
+router.patch(
+  '/sheets/:uuid/entities/defaultImageSize/:uuid',
+  authMiddleware,
+  EntitiesController.returnOriginalSizeImage
+);
+router.delete('/sheets/:uuid/entities/:uuid', authMiddleware, EntitiesController.deleteEntity);
 
 export default router;
 
@@ -34,13 +44,13 @@ export default router;
 //   switch (req.event) {
 //     // create
 //     case 'createUser':
-//       const createdUserData = await UsersController.createUser(req);
+//       const createdUserData = await UserController.createUser(req);
 //       submitToUsers('createEntity', createdUserData.startEntity);
 //       submitToUsers('createSheet', createdUserData.homeSheet);
 //       submitToUsers('createUser', createdUserData.createdUser);
 //       break;
 //     case 'createSheet':
-//       const createdSheet = await SheetsController.createSheet(req);
+//       const createdSheet = await SheetController.createSheet(req);
 //       submitToUsers('createSheet', createdSheet);
 //       break;
 //     case 'createEntity':
@@ -49,15 +59,15 @@ export default router;
 //       break;
 //     // read
 //     case 'getUser':
-//       const userInfo = await UsersController.getUser(req);
+//       const userInfo = await UserController.getUser(req);
 //       submitToUsers('getUser', userInfo);
 //       break;
 //     case 'getSheet':
-//       const sheetInfo = await SheetsController.getSheet(req);
+//       const sheetInfo = await SheetController.getSheet(req);
 //       submitToUsers('getSheet', sheetInfo);
 //       break;
 //     case 'getSheetBackground':
-//       const homeBackground = await SheetsController.getSheetBackground(req);
+//       const homeBackground = await SheetController.getSheetBackground(req);
 //       submitFilesToUsers(homeBackground);
 //       break;
 //     case 'getSheetEntities':
@@ -69,15 +79,15 @@ export default router;
 //       break;
 //     // update
 //     case 'editUser':
-//       const editedUser = await UsersController.editUser(req);
+//       const editedUser = await UserController.editUser(req);
 //       submitToUsers('editUser', editedUser);
 //       break;
 //     case 'editSheet':
-//       const editedSheet = await SheetsController.editSheet(req);
+//       const editedSheet = await SheetController.editSheet(req);
 //       submitToUsers('editSheet', editedSheet);
 //       break;
 //     case 'editSheetBackground':
-//       await SheetsController.editSheetBackground(req);
+//       await SheetController.editSheetBackground(req);
 //       submitToUsers('editSheetBackground', { ...req });
 //       break;
 //     case 'editEntity': {
@@ -101,15 +111,15 @@ export default router;
 //       break;
 //     // delete
 //     case 'deleteUser':
-//       const deletedUser = await UsersController.deleteUser(req);
+//       const deletedUser = await UserController.deleteUser(req);
 //       submitToUsers('deleteUser', deletedUser);
 //       break;
 //     case 'deleteSheet':
-//       const deletedSheet = await SheetsController.deleteSheet(req);
+//       const deletedSheet = await SheetController.deleteSheet(req);
 //       submitToUsers('deleteSheet', deletedSheet);
 //       break;
 //     case 'deleteSheetBackground':
-//       await SheetsController.deleteSheetBackground(req);
+//       await SheetController.deleteSheetBackground(req);
 //       break;
 //     case 'deleteEntity':
 //       const deletedEntity = await EntitiesController.deleteEntity(req);

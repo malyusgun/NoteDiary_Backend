@@ -1,14 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'node:fs';
 import path from 'node:path';
-import { ISheet, ISheetUuid, IEditSheetBackground } from '../interface/requests';
+import { ISheet, IEditSheetBackground } from '../interfaces/requests';
 import { randomUUID } from 'node:crypto';
-import UsersService from './usersService';
-import { IEntityDB, ISheetDB } from '../interface/database';
+import UserService from './userService';
+import { IEntityDB, ISheetDB } from '../interfaces/database';
 
 const prisma = new PrismaClient();
 
-class SheetsService {
+class SheetService {
   // the only method for buffer connection
   async getSheetBackground(sheet_uuid: string) {
     const backgroundInfo = await prisma.sheet.findFirst({
@@ -29,7 +29,7 @@ class SheetsService {
     body.sheet_icon = 'page';
     body.sheet_navigation_order = '1';
     body.sheet_entities = [];
-    await UsersService.addUserSheet(body, body.user_uuid);
+    await UserService.addUserSheet(body, body.user_uuid);
     return prisma.sheet.create({ data: body as ISheetDB });
   }
 
@@ -90,7 +90,7 @@ class SheetsService {
   }
 
   async deleteSheet(sheet: ISheet) {
-    await UsersService.deleteUserSheet(sheet.sheet_uuid!, sheet.user_uuid);
+    await UserService.deleteUserSheet(sheet.sheet_uuid!, sheet.user_uuid);
     return prisma.sheet.delete({
       where: {
         sheet_uuid: sheet.sheet_uuid
@@ -133,4 +133,4 @@ class SheetsService {
   }
 }
 
-export default new SheetsService();
+export default new SheetService();

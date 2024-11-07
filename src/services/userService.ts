@@ -1,15 +1,48 @@
 import { PrismaClient } from '@prisma/client';
-import { ISheet, IUser } from '../interface/requests';
+import { ISheet, IUser } from '../interfaces/requests';
+import { IEntityDB, IUserDB } from '../interfaces/database';
 import { randomUUID } from 'node:crypto';
-import SheetsService from './sheetsService';
+import path from 'node:path';
+import * as fs from 'node:fs';
+import SheetService from './sheetService';
 import EntitiesService from './entitiesService';
-import { IEntityDB, IUserDB } from '../interface/database';
+import tokenService from './tokenService';
+import { convertUserData, getUserDataFromAuthFile } from '../helpers';
 
 const prisma = new PrismaClient();
 
-class UsersService {
-  async createUser(body: IUser) {
+class UserService {
+  confirmMail(body: IUser) {
     body.user_uuid = randomUUID();
+    const usersDataFile = path.join(path.resolve(), `/public/auth.txt`);
+    if (!fs.existsSync(usersDataFile)) {
+      fs.writeFileSync(usersDataFile, '');
+    }
+    let fileContent = fs.readFileSync(usersDataFile).toString();
+
+    const code = (Math.random() * 1000000).toFixed();
+    const userInfo = convertUserData(body, 'to', code);
+    fs.writeFileSync(usersDataFile, fileContent + userInfo);
+    return code;
+  }
+
+  getConfirmMailCode(user_uuid: string) {
+    const userData = getUserDataFromAuthFile(user_uuid);
+    return userData.code;
+  }
+
+  async registration(body: IUser) {
+    const tokens = tokenService.generateTokens({
+      user_uuid: body.user_uuid!,
+      password: body.password
+    });
+    let userDataDB = { ...body, access_token: '', refresh_token: '' };
+    userDataDB.access_token = tokens.accessToken;
+    userDataDB.refresh_token = tokens.refreshToken;
+    return await this.createUser(userDataDB as unknown as IUserDB);
+  }
+
+  async createUser(body: IUserDB) {
     const homeSheetUuid = randomUUID();
     const userSheets = [
       {
@@ -37,7 +70,7 @@ class UsersService {
       entity_order: 1
     };
 
-    const homeSheet = await SheetsService.createSheet({
+    const homeSheet = await SheetService.createSheet({
       user_uuid: body.user_uuid,
       sheet_uuid: homeSheetUuid,
       sheet_title: 'Home page',
@@ -114,4 +147,4 @@ class UsersService {
   }
 }
 
-export default new UsersService();
+export default new UserService();

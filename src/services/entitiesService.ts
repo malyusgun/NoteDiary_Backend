@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'node:fs';
 import path from 'node:path';
-import { IEntityDB, ISheetDB } from '../interface/database';
+import { IEntityDB, ISheetDB } from '../interfaces/database';
 import { randomUUID } from 'node:crypto';
 import {
   createPrismaEntity,
@@ -10,7 +10,7 @@ import {
   getPrismaEntity,
   updatePrismaEntity
 } from '../helpers';
-import SheetsService from './sheetsService';
+import SheetService from './sheetService';
 
 const prisma = new PrismaClient();
 
@@ -59,7 +59,7 @@ class EntitiesService {
     const sheet_uuid = body.sheet_uuid!;
     delete body.sheet_uuid;
     const createdEntity = (await createPrismaEntity(body)) as IEntityDB;
-    await SheetsService.addSheetEntity(body, sheet_uuid);
+    await SheetService.addSheetEntity(body, sheet_uuid);
 
     return createdEntity;
   }
@@ -162,7 +162,7 @@ class EntitiesService {
         });
       }
     }
-    await SheetsService.deleteSheetEntity(body.sheet_uuid!, body.entity_uuid);
+    await SheetService.deleteSheetEntity(body.sheet_uuid!, body.entity_uuid);
     return {
       entity_uuid: body.entity_uuid
     };
