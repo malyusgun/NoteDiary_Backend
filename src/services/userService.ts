@@ -8,11 +8,15 @@ import SheetService from './sheetService';
 import EntitiesService from './entitiesService';
 import tokenService from './tokenService';
 import { convertUserData, getUserDataFromAuthFile } from '../helpers';
+import { IError, ITokenPayload } from '../interfaces';
+import sendActivationMail from './mailService';
+import ApiError from '../exceptions/ApiError';
+import { JwtPayload } from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
 class UserService {
-  confirmMail(body: IUser) {
+  async confirmMail(body: IUser) {
     body.user_uuid = randomUUID();
     const usersDataFile = path.join(path.resolve(), `/public/auth.txt`);
     if (!fs.existsSync(usersDataFile)) {
@@ -20,26 +24,85 @@ class UserService {
     }
     let fileContent = fs.readFileSync(usersDataFile).toString();
 
-    const code = (Math.random() * 1000000).toFixed();
+    let code = (Math.random() * 1000000).toFixed();
+    while (code.length < 6) {
+      code = '0' + code;
+    }
     const userInfo = convertUserData(body, 'to', code);
     fs.writeFileSync(usersDataFile, fileContent + userInfo);
-    return code;
+    await sendActivationMail(body.email, code);
+    return {
+      code,
+      user_uuid: body.user_uuid
+    };
   }
 
   getConfirmMailCode(user_uuid: string) {
     const userData = getUserDataFromAuthFile(user_uuid);
+    // code expired, 5 minutes have passed
+    if (Date.now() >= +userData.codeDieTime) {
+      return 'expired';
+    }
     return userData.code;
   }
 
   async registration(body: IUser) {
+    const userData = { ...body };
     const tokens = tokenService.generateTokens({
       user_uuid: body.user_uuid!,
       password: body.password
     });
-    let userDataDB = { ...body, access_token: '', refresh_token: '' };
+    let userDataDB = { ...userData, access_token: '', refresh_token: '' };
     userDataDB.access_token = tokens.accessToken;
     userDataDB.refresh_token = tokens.refreshToken;
     return await this.createUser(userDataDB as unknown as IUserDB);
+  }
+
+  refresh(refresh_token: string) {
+    const refreshResult = tokenService.validateRefreshToken(refresh_token);
+    if (!refreshResult) {
+      throw ApiError.throwUnauthorizedException();
+    }
+    const mainUserData = { ...(refreshResult as JwtPayload) };
+    delete mainUserData.exp;
+    delete mainUserData.iat;
+    return tokenService.generateAccessToken(mainUserData as ITokenPayload);
+  }
+
+  async login(body: IUser): Promise<IUserDB | IError> {
+    let userDataDB = await this.getUser(body.nick_name, true);
+    if (body.password !== userDataDB.password) {
+      return ApiError.throwForbiddenException();
+    }
+    const tokens = tokenService.generateTokens({
+      user_uuid: userDataDB.user_uuid,
+      password: userDataDB.password
+    });
+
+    userDataDB.access_token = tokens.accessToken;
+    userDataDB.refresh_token = tokens.refreshToken;
+    return userDataDB;
+  }
+
+  async logout(body: IUser) {
+    const userDataDB = (await prisma.user.findFirst({
+      where: {
+        nick_name: body.nick_name
+      }
+    })) as unknown as IUserDB;
+    let userDataWithoutTokens = {
+      ...userDataDB,
+      user_sheets: JSON.stringify(body.user_sheets)
+    } as IUserDB;
+    delete userDataWithoutTokens.access_token;
+    delete userDataWithoutTokens.refresh_token;
+    await prisma.user.update({
+      where: {
+        user_uuid: userDataWithoutTokens.user_uuid
+      },
+      data: userDataWithoutTokens
+    });
+    return true;
   }
 
   async createUser(body: IUserDB) {
@@ -53,7 +116,9 @@ class UserService {
       }
     ];
 
-    const createdUser = await prisma.user.create({ data: { ...body, user_sheets: JSON.stringify(userSheets) } });
+    const createdUser = (await prisma.user.create({
+      data: { ...body, user_sheets: JSON.stringify(userSheets) }
+    })) as IUserDB;
     const startEntity = {
       entity_uuid: randomUUID(),
       sheet_uuid: homeSheetUuid,
@@ -86,12 +151,19 @@ class UserService {
     };
   }
 
-  async getUser(user_uuid: string) {
+  async getUser(uniqueKey: string, isNickName?: boolean) {
+    if (isNickName) {
+      return prisma.user.findFirst({
+        where: {
+          nick_name: uniqueKey
+        }
+      }) as unknown as IUserDB;
+    }
     return prisma.user.findFirst({
       where: {
-        user_uuid
+        user_uuid: uniqueKey
       }
-    });
+    }) as unknown as IUserDB;
   }
 
   async addUserSheet(sheet: ISheet, user_uuid: string) {
@@ -118,15 +190,22 @@ class UserService {
       where: {
         user_uuid: body.user_uuid
       }
-    });
+    }) as unknown as IUserDB;
   }
+
   async deleteUser(body: IUser) {
+    const imagesPath = path.join(path.resolve(), `/public/images`);
+    const images = fs.readdirSync(imagesPath);
+    images.forEach((image) => {
+      if (image.includes(body.user_uuid!)) fs.unlinkSync(path.resolve(imagesPath, image));
+    });
     return prisma.user.delete({
       where: {
         user_uuid: body.user_uuid
       }
-    });
+    }) as unknown as IUserDB;
   }
+
   async deleteUserSheet(sheet_uuid: string, user_uuid: string) {
     const currentUser = (await prisma.user.findFirst({
       where: {

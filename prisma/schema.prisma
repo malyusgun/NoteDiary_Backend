@@ -11,17 +11,17 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  // при запуске с рабочего ноутбука
-  // directUrl = env("DIRECT_URL")
 }
 
 model User {
-  user_uuid      String @id @default(uuid())
+  user_uuid      String  @id @default(uuid())
   nick_name      String
   password       String
   email          String
   favorite_color String
   user_sheets    Json?
+  access_token   String?
+  refresh_token  String?
 }
 
 model Sheet {

@@ -15,14 +15,24 @@ const PORT = Number(process.env.PORT) || 5000;
 const BUFFER_PORT = process.env.BUFFER_PORT || 5001;
 
 app.use(express.json());
-app.use('/api/v1', router);
-app.use(cors());
 app.use(cookieParser());
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL
+  })
+);
+app.use('/api/v1', router);
 
+// порт для отправки буффера на сервер
 appBuffer.use(express.raw({ type: 'image/jpeg', limit: '100mb' }));
+appBuffer.use(
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL
+  })
+);
 appBuffer.use('/api/v1', routerBuffer);
-appBuffer.use(cors());
-appBuffer.use(cookieParser());
 
-app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
-appBuffer.listen(BUFFER_PORT, () => console.log(`Listening buffers on port ${BUFFER_PORT}`));
+app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+appBuffer.listen(BUFFER_PORT, () => console.log(`Listening buffers on ${BUFFER_PORT}`));

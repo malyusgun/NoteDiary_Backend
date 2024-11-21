@@ -1,9 +1,9 @@
 import TokenService from '../services/tokenService';
+import ApiError from '../exceptions/ApiError.js';
 
 export default function (req, res, next) {
   try {
-    const accessToken = req.cookies.access_token;
-
+    const accessToken = req.cookies?.access_token;
     if (!accessToken) {
       return next(ApiError.throwUnauthorizedException());
     }

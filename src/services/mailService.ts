@@ -1,35 +1,32 @@
 import nodemailer from 'nodemailer';
 
-class MailService {
-  private transporter: any;
-
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.mail.ru',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.MAIL_NAME,
-        pass: process.env.MAIL_PASSWORD
-      }
-    });
+const transporter = nodemailer.createTransport({
+  host: 'smtp.mail.ru',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.MAIL_NAME,
+    pass: process.env.MAIL_PASSWORD
   }
+});
 
-  async sendActivationEmail(to: string, code: string) {
-    await this.transporter.sendMail({
+const sendActivationMail = async (to: string, code: string) => {
+  try {
+    await transporter.sendMail({
       from: process.env.MAIL_NAME,
       to,
-      subject: 'Activation email',
+      subject: 'Activation mail',
       text: '',
       html: `
         <div> 
-          <h1>Активация аккаунта</h1>
-          <p>Для активации аккаунта в сервисе "NoteDiary" введите код, представленный ниже:</p>
-          <p style="font-size: 24px; font-weight: bold;">${code}</p>
-          <p><span style="font-style: italic; color: red">Внимание:<span/> код действует в течение 5 минут, после чего он будет недействителен.</p>
+          <p>To activate your account in the "NoteDiary" service, enter the code below:</p>
+          <p style="font-size: 24px; font-weight: bold;">${code}<br>
+          <span style="color: red">Attention:<span/> the code is valid for 5 minutes, after which it will be invalid.</p>
       `
     });
+  } catch (e) {
+    console.error(e);
   }
-}
+};
 
-export default new MailService();
+export default sendActivationMail;

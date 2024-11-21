@@ -157,22 +157,24 @@ export const deletePrismaEntity = async (body: any) => {
 export const getUserDataFromAuthFile = (user_uuid: string): IUserAuth => {
   const usersDataFile = path.join(path.resolve(), `/public/auth.txt`);
   let fileContent = fs.readFileSync(usersDataFile).toString();
-  const targetChunk = fileContent.split('$').find((chunk) => chunk.includes(user_uuid))!;
+  const targetChunk = fileContent.split('/@$@/').find((chunk) => chunk.includes(user_uuid))!;
   return convertUserData(targetChunk, 'from') as IUserAuth;
 };
 
 export const convertUserData = (body: IUser | string, convertType: 'to' | 'from', code?: string) => {
   if (convertType === 'to' && typeof body === 'object') {
-    return `${body.user_uuid}@${code}@${body.nick_name}@${body.email}@${body.password}$`;
+    const codeDieTime = Date.now() + 1000 * 60 * 5;
+    return `${body.user_uuid}/@#@/${code}/@#@/${body.nick_name}/@#@/${body.email}/@#@/${body.password}/@#@/${codeDieTime}/@$@/`;
   }
   if (typeof body === 'string') {
-    const chunks = body.split('@');
+    const chunks = body.split('/@#@/');
     return {
       user_uuid: chunks[0],
       code: chunks[1],
       nick_name: chunks[2],
       email: chunks[3],
-      password: chunks[4]
+      password: chunks[4],
+      codeDieTime: chunks[5]
     };
   }
 };

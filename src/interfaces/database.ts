@@ -39,8 +39,8 @@ export interface IUserDB {
   email: string;
   favorite_color: string;
   user_sheets: string;
-  access_token: string;
-  refresh_token: string;
+  access_token?: string;
+  refresh_token?: string;
 }
 export interface ITableColumnDB {
   column_uuid: string;

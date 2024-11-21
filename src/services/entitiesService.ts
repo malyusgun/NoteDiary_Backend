@@ -24,7 +24,6 @@ class EntitiesService {
       if (!fs.existsSync(imagesPath)) {
         fs.mkdirSync(imagesPath);
         fs.mkdirSync(path.join(imagesPath, '/images'));
-        console.log('2');
       }
       fs.writeFileSync(originalImagePath, body);
       this.buffer = body;
@@ -40,13 +39,11 @@ class EntitiesService {
   }
 
   async createEntity(body: IEntityDB) {
-    console.log('createEntity body: ', body);
     if (!body.entity_uuid) body.entity_uuid = randomUUID();
 
     if (body.entity_type === 'image') {
       const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
       const originalImagePath = path.join(path.resolve(), `/public/images/originalImage.jpg`);
-      console.log('this.buffer: ', this.buffer);
       fs.writeFileSync(imagePath, this.buffer!);
       const newImagePath = getImagePathByUuid(body.entity_uuid);
       const newOriginalImagePath = getImagePathByUuid(body.entity_uuid, true);
@@ -77,7 +74,6 @@ class EntitiesService {
         entities.push(entityToPush);
       }
       const imageEntities: Buffer[][] = [];
-      console.log('entities: ', entities);
       entities.forEach((entity) => {
         if (!entity?.image_width) return;
 
@@ -131,7 +127,6 @@ class EntitiesService {
   }
 
   async editEntity(body: IEntityDB) {
-    console.log('editEntity body: ', body);
     return updatePrismaEntity(body);
   }
 
