@@ -1,63 +1,98 @@
 import EntitiesService from '../services/entitiesService';
-import { IBodyPageUuid, IChangeEntitiesOrder, IWSRequest } from '../interface/requests';
-import { IEntity } from '../interface/database';
+import { IChangeEntitiesOrder } from '../interfaces/requests';
+import { IEntityDB } from '../interfaces/database';
+import { Request, Response } from 'express';
 
 class EntitiesController {
-  async createEntity(req: IWSRequest<'createEntities', IEntity>) {
+  // two only methods for buffer connection
+  async createImage(req: Request, res: Response) {
     try {
-      return await EntitiesService.createEntity(req.body);
-    } catch (error) {
-      console.log(error);
+      const entity = await EntitiesService.createImage(req.body as unknown as Buffer);
+      res.json(entity);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
-  async createImage(req: Buffer, isCropImageNow: boolean) {
+
+  async createImageForCrop(req: Request, res: Response) {
     try {
-      return await EntitiesService.createImage(req, isCropImageNow);
-    } catch (error) {
-      console.log(error);
+      const entity = await EntitiesService.createImageForCrop(req.body as unknown as Buffer);
+      res.json(entity);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
-  async getEntities(req: IWSRequest<'getEntities', IBodyPageUuid>) {
+
+  async createEntity(req: Request, res: Response) {
     try {
-      return await EntitiesService.getEntities(req.body.page_uuid);
-    } catch (error) {
-      console.log(error);
-      return error;
+      const entity = await EntitiesService.createEntity(req.body as unknown as IEntityDB);
+      res.json(entity);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
-  async editEntity(req: IWSRequest<'editEntity', IEntity>) {
+
+  async getEntities(req: Request, res: Response) {
     try {
-      return await EntitiesService.editEntity(req.body);
-    } catch (error) {
-      console.log(error);
+      const sheetUuid = req.url.split('/')[2];
+      const entities = await EntitiesService.getEntities(sheetUuid);
+      res.json(entities);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
-  async cropImage(req: IWSRequest<'cropImage', IEntity>) {
+
+  async editEntity(req: Request, res: Response) {
     try {
-      return await EntitiesService.cropImage(req.body);
-    } catch (error) {
-      console.log(error);
+      const entity = await EntitiesService.editEntity(req.body as unknown as IEntityDB);
+      res.json(entity);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
-  async returnOriginalSizeImage(req: IWSRequest<'returnOriginalSizeImage', IEntity>) {
+
+  async cropImage(req: Request, res: Response) {
     try {
-      return await EntitiesService.returnOriginalSizeImage(req.body);
-    } catch (error) {
-      console.log(error);
+      const entityImage = await EntitiesService.cropImage(req.body as unknown as IEntityDB);
+      res.json(entityImage);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
-  async changeEntitiesOrder(req: IChangeEntitiesOrder) {
+
+  async returnOriginalSizeImage(req: Request, res: Response) {
     try {
-      return await EntitiesService.changeEntitiesOrder(req.body);
-    } catch (error) {
-      console.log(error);
+      const entityImage = await EntitiesService.returnOriginalSizeImage(req.body as unknown as IEntityDB);
+      res.json(entityImage);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
-  async deleteEntity(req: IWSRequest<'deleteEntity', IEntity>) {
+
+  async changeEntitiesOrder(req: Request, res: Response) {
     try {
-      return await EntitiesService.deleteEntity(req.body);
-    } catch (error) {
-      console.log(error);
+      const entities = await EntitiesService.changeEntitiesOrder(req.body as unknown as IChangeEntitiesOrder);
+      res.json(entities);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
+    }
+  }
+
+  async deleteEntity(req: Request, res: Response) {
+    try {
+      const entity = await EntitiesService.deleteEntity(req.body as unknown as IEntityDB);
+      res.json(entity);
+    } catch (e) {
+      console.log('error: ', e);
+      res.status(500).json(e);
     }
   }
 }

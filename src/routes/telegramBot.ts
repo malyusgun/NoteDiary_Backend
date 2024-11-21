@@ -3,7 +3,7 @@ import { validateMessage } from '../helpers';
 import path from 'node:path';
 import * as fs from 'node:fs';
 
-export const sendMessageOnStart = async (chatId) => {
+export const sendMessageOnStart = async (chatId: number) => {
   await bot.sendMessage(chatId, 'Что Вас интересует?', {
     reply_markup: {
       inline_keyboard: [
@@ -14,14 +14,14 @@ export const sendMessageOnStart = async (chatId) => {
     }
   });
 };
-export const sendMessageOnInfo = async (chatId) => {
+export const sendMessageOnInfo = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
-    'Хотите отправить жалобу на работу приложения "ShelfNote", есть предложения по улучшению' +
+    'Хотите отправить жалобу на работу приложения "NoteDiary", есть предложения по улучшению' +
       ' или вопросы по его функционалу? Напишите нам, и мы обязательно их рассмотрим🕵🏻🔎'
   );
 };
-export const sendMessageOnComplaint = async (chatId) => {
+export const sendMessageOnComplaint = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     'Опишите свою жалобу 😖\n<b>Внимание: необходимо первым словом ввести слово "жалоба".</b>\n\n<i>Рекомендуемый формат:</i>\n' +
@@ -35,7 +35,7 @@ export const sendMessageOnComplaint = async (chatId) => {
     }
   );
 };
-export const sendMessageOnSuggestion = async (chatId) => {
+export const sendMessageOnSuggestion = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     'Опишите своё пожелание ☺️<b>\nВнимание: необходимо первым словом ввести слово "пожелание"</b>\n\n<i>Рекомендуемый формат текста:</i>\n' +
@@ -49,7 +49,7 @@ export const sendMessageOnSuggestion = async (chatId) => {
     }
   );
 };
-export const sendMessageOnQuestion = async (chatId) => {
+export const sendMessageOnQuestion = async (chatId: number) => {
   await bot.sendMessage(chatId, 'Что Вас интересует?', {
     reply_markup: {
       inline_keyboard: [
@@ -60,7 +60,7 @@ export const sendMessageOnQuestion = async (chatId) => {
     }
   });
 };
-export const sendMessageOnTextInfo = async (chatId) => {
+export const sendMessageOnTextInfo = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Параграф</b>\n<i>Описание: </i>' +
@@ -79,7 +79,7 @@ export const sendMessageOnTextInfo = async (chatId) => {
     }
   );
 };
-export const sendMessageOnTextSettingsGeneral = async (chatId) => {
+export const sendMessageOnTextSettingsGeneral = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Общие настройки параграфа</b>' +
@@ -93,7 +93,7 @@ export const sendMessageOnTextSettingsGeneral = async (chatId) => {
     }
   );
 };
-export const sendMessageOnTextSettingsFont = async (chatId) => {
+export const sendMessageOnTextSettingsFont = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Настройка шрифта</b>' +
@@ -106,7 +106,7 @@ export const sendMessageOnTextSettingsFont = async (chatId) => {
     }
   );
 };
-export const sendMessageOnTextSettingsPosition = async (chatId) => {
+export const sendMessageOnTextSettingsPosition = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Настройка положения параграфа</b>' +
@@ -121,7 +121,7 @@ export const sendMessageOnTextSettingsPosition = async (chatId) => {
     }
   );
 };
-export const sendMessageOnImageInfo = async (chatId) => {
+export const sendMessageOnImageInfo = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Изображение</b>\n<i>Описание: </i>' +
@@ -141,7 +141,7 @@ export const sendMessageOnImageInfo = async (chatId) => {
     }
   );
 };
-export const sendMessageOnImageSettingsGeneral = async (chatId) => {
+export const sendMessageOnImageSettingsGeneral = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Общие настройки изображения</b>' +
@@ -158,7 +158,7 @@ export const sendMessageOnImageSettingsGeneral = async (chatId) => {
     }
   );
 };
-export const sendMessageOnImageSettingsFont = async (chatId) => {
+export const sendMessageOnImageSettingsFont = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Настройка шрифта</b>' +
@@ -171,7 +171,7 @@ export const sendMessageOnImageSettingsFont = async (chatId) => {
     }
   );
 };
-export const sendMessageOnImageSettingsPosition = async (chatId) => {
+export const sendMessageOnImageSettingsPosition = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
     '<b>Настройка положения блока с изображением</b>' +
@@ -189,7 +189,7 @@ export const sendMessageOnImageSettingsPosition = async (chatId) => {
     }
   );
 };
-export const onComplaintResponse = async (chatId, complaint) => {
+export const onComplaintResponse = async (chatId: number, complaint: string) => {
   try {
     const imagePath = path.join(
       path.resolve(),
@@ -209,7 +209,7 @@ export const onComplaintResponse = async (chatId, complaint) => {
     await sendMessageOnStart(chatId);
   }
 };
-export const onSuggestionResponse = async (chatId, suggestion) => {
+export const onSuggestionResponse = async (chatId: number, suggestion: string) => {
   await validateMessage(
     suggestion,
     'Ваше предложение принято на рассмотрение.',
