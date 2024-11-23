@@ -27,7 +27,7 @@ class SheetService {
       body.sheet_uuid = randomUUID();
     }
     body.sheet_icon = 'page';
-    body.sheet_navigation_order = '1';
+    body.sheet_children = [];
     body.sheet_entities = [];
     await UserService.addUserSheet(body, body.user_uuid);
     return prisma.sheet.create({ data: body as ISheetDB });

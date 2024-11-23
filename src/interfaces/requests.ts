@@ -5,7 +5,7 @@ export interface ISheet {
   sheet_uuid?: string;
   sheet_title: string;
   sheet_icon?: string;
-  sheet_navigation_order?: string;
+  sheet_children?: string[];
   sheet_entities?: string[];
 }
 export interface IUser {

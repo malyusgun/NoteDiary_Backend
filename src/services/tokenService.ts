@@ -12,7 +12,7 @@ class TokenService {
   }
 
   generateAccessToken(payload: ITokenPayload) {
-    return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, { expiresIn: 10 });
+    return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, { expiresIn: 600 });
   }
 
   validateAccessToken(accessToken: string) {

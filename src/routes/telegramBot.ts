@@ -82,9 +82,7 @@ export const sendMessageOnTextInfo = async (chatId: number) => {
 export const sendMessageOnTextSettingsGeneral = async (chatId: number) => {
   await bot.sendMessage(
     chatId,
-    '<b>Общие настройки параграфа</b>' +
-      '\n- Добавление заголовка и его удаление;' +
-      '\n- Удаление параграфа;',
+    '<b>Общие настройки параграфа</b>' + '\n- Добавление заголовка и его удаление;' + '\n- Удаление параграфа;',
     {
       parse_mode: 'HTML',
       reply_markup: {
@@ -196,26 +194,16 @@ export const onComplaintResponse = async (chatId: number, complaint: string) => 
       `/public/telegramBot/complaints/${complaint.split('').slice(0, 25).join('')}.txt`
     );
     fs.writeFileSync(imagePath, complaint);
-    await validateMessage(
-      complaint,
-      'Ваша жалоба принята на рассмотрение.',
-      'Некорректное содержание.',
-      chatId
-    );
+    await validateMessage(complaint, 'Ваша жалоба принята на рассмотрение.', 'Некорректное содержание.', chatId);
   } catch (e) {
     await bot.sendMessage(chatId, 'Произошла ошибка на стороне сервера. Приносим свои извинения.');
-    console.error('error: ', e);
+    console.log('error: ', e);
   } finally {
     await sendMessageOnStart(chatId);
   }
 };
 export const onSuggestionResponse = async (chatId: number, suggestion: string) => {
-  await validateMessage(
-    suggestion,
-    'Ваше предложение принято на рассмотрение.',
-    'Некорректное содержание.',
-    chatId
-  );
+  await validateMessage(suggestion, 'Ваше предложение принято на рассмотрение.', 'Некорректное содержание.', chatId);
   const imagePath = path.join(
     path.resolve(),
     `/public/telegramBot/suggestions/${suggestion.split('').slice(0, 25).join('')}.txt`
