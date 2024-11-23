@@ -13,7 +13,7 @@ controllers, services, interfaces (хранящим типы данных).
 | Объект  |      Поле       |                         Формат хранения                          |
 |:-------:|:---------------:|:----------------------------------------------------------------:|
 |  Sheet  | sheet_entities  |                   [entity_type]$[entity_uuid]                    |
-|  User   |           | [sheet_uuid]$[sheet_title]$[sheet_icon]$[sheet_navigation_order] |
+|  User   |           | [sheet_uuid]$[sheet_title]$[sheet_icon]$[sheet_children] |
 
 ### Настройка окружения
 

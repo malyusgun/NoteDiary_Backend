@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { ISheet, IUser } from '../interfaces/requests';
-import { IEntityDB, IUserDB } from '../interfaces/database';
+import { IEntityDB, ISheetDB, IUserDB } from '../interfaces/database';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import * as fs from 'node:fs';
@@ -78,7 +78,6 @@ class UserService {
       user_uuid: userDataDB.user_uuid,
       password: userDataDB.password
     });
-
     userDataDB.access_token = tokens.accessToken;
     userDataDB.refresh_token = tokens.refreshToken;
     return userDataDB;
@@ -109,10 +108,11 @@ class UserService {
     const homeSheetUuid = randomUUID();
     const userSheets = [
       {
+        user_uuid: body.user_uuid,
         sheet_uuid: homeSheetUuid,
         sheet_title: 'Home page',
         sheet_icon: 'home',
-        sheet_navigation_order: '0'
+        sheet_children: []
       }
     ];
 
@@ -135,13 +135,14 @@ class UserService {
       entity_order: 1
     };
 
-    const homeSheet = await SheetService.createSheet({
+    const homeSheet = {
       user_uuid: body.user_uuid,
       sheet_uuid: homeSheetUuid,
       sheet_title: 'Home page',
-      sheet_navigation_order: '0'
-    });
-
+      sheet_icon: 'home',
+      sheet_children: []
+    };
+    await prisma.sheet.create({ data: homeSheet as unknown as ISheetDB });
     await EntitiesService.createEntity(startEntity as IEntityDB);
 
     return {
@@ -175,7 +176,6 @@ class UserService {
     const userSheets = JSON.parse(user.user_sheets);
     userSheets.push(sheet);
     user.user_sheets = JSON.stringify(userSheets);
-
     return prisma.user.update({
       data: user as IUserDB,
       where: {
@@ -185,8 +185,13 @@ class UserService {
   }
 
   async editUser(body: IUser) {
+    const user = await prisma.user.findFirst({
+      where: {
+        user_uuid: body.user_uuid
+      }
+    });
     return prisma.user.update({
-      data: { ...body, user_sheets: JSON.stringify(body.user_sheets) },
+      data: { ...user, ...body, user_sheets: JSON.stringify(body.user_sheets) },
       where: {
         user_uuid: body.user_uuid
       }

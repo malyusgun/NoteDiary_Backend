@@ -25,7 +25,7 @@ const sendActivationMail = async (to: string, code: string) => {
       `
     });
   } catch (e) {
-    console.error(e);
+    console.log('error: ', e);
   }
 };
 

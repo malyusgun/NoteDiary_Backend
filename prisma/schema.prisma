@@ -25,13 +25,13 @@ model User {
 }
 
 model Sheet {
-  user_uuid              String
-  sheet_uuid             String   @id @default(uuid())
-  sheet_title            String
-  sheet_icon             String
-  sheet_navigation_order String
-  background_path        String?  @db.Text
-  sheet_entities         String[]
+  user_uuid       String
+  sheet_uuid      String   @id @default(uuid())
+  sheet_title     String
+  sheet_icon      String
+  sheet_children  String[]
+  background_path String?  @db.Text
+  sheet_entities  String[]
 }
 
 model Divider {

@@ -9,6 +9,7 @@ class UserController {
       const data = await UserService.confirmMail(req.body);
       res.json(data);
     } catch (e) {
+      console.log('error: ', e);
       res.status(500).json(e);
     }
   }
@@ -19,6 +20,7 @@ class UserController {
       const code = UserService.getConfirmMailCode(userUuid);
       res.json(code);
     } catch (e) {
+      console.log('error: ', e);
       res.status(500).json(e);
     }
   }
@@ -34,6 +36,7 @@ class UserController {
 
       res.json(userData);
     } catch (e) {
+      console.log('error: ', e);
       res.status(500).json(e);
     }
   }
@@ -48,6 +51,7 @@ class UserController {
 
       res.json(userData);
     } catch (e) {
+      console.log('error: ', e);
       // @ts-ignore
       res.status(e?.status).json(e);
     }
@@ -73,6 +77,7 @@ class UserController {
       res.clearCookie('refresh_token');
       res.json('Successfully longed out');
     } catch (e) {
+      console.log('error: ', e);
       res.status(500).json(e);
     }
   }
@@ -85,6 +90,7 @@ class UserController {
       delete user.refresh_token;
       res.json(user);
     } catch (e) {
+      console.log('error: ', e);
       res.status(500).json(e);
     }
   }
@@ -97,6 +103,7 @@ class UserController {
       delete user.refresh_token;
       res.json(user);
     } catch (e) {
+      console.log('error: ', e);
       res.status(500).json(e);
     }
   }
@@ -109,6 +116,7 @@ class UserController {
       delete user.refresh_token;
       res.json(user);
     } catch (e) {
+      console.log('error: ', e);
       res.status(500).json(e);
     }
   }
