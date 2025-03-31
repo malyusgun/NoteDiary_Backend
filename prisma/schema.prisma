@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_uuid      String  @id @default(uuid())
+  nick_name      String
+  password       String
+  email          String
+  favorite_color String
+  user_sheets    Json?
+  access_token   String?
+  refresh_token  String?
+}
+
+model Sheet {
+  user_uuid       String
+  sheet_uuid      String   @id @default(uuid())
+  sheet_title     String
+  sheet_icon      String
+  sheet_children  String[]
+  background_path String?  @db.Text
+  sheet_entities  String[]
+}
+
+model Divider {
+  entity_type    String
+  entity_uuid    String  @id @default(uuid())
+  entity_order   Int
+  divider_height Int?
+  divider_type   String?
+}
+
+model Paragraph {
+  entity_type           String
+  entity_uuid           String  @id @default(uuid())
+  entity_order          Int
+  title                 String?
+  text                  String? @db.Text
+  font_size             String?
+  paragraph_size        String?
+  entity_position       String?
+  entity_title_position String?
+}
+
+model Image {
+  entity_type           String
+  entity_uuid           String  @id @default(uuid())
+  entity_order          Int
+  image_path            String? @db.Text
+  image_url_initial     String?
+  image_width_initial   Int
+  file_width_initial    Int
+  file_height_initial   Int
+  image_width           Int?
+  file_width            Int?
+  file_height           Int?
+  image_scale           String?
+  title                 String?
+  text                  String? @db.Text
+  font_size             String?
+  paragraph_size        String?
+  entity_title_position String?
+  text_position         String?
+  entity_position       String?
+}
+
+model Table {
+    entity_type           String
+    entity_uuid           String  @id @default(uuid())
+    entity_order          Int
+    title                 String?
+    entity_position       String?
+    entity_title_position String?
+    table_columns         Json?
+    table_data            Json?
+    multipleSort          Boolean?
+    gap                   String?
+    size                  String?
+    font_size             String?
+    showAllLines          Boolean?
+    stripedRows           Boolean?
+    center                Boolean?
+    fontSize              String?
+    theme                 String?
+    textColor             String?
+    darknessTheme         String?
+    darknessTextColor     String?
+    paginator             Boolean?
+    editable              Boolean?
+    noEditingSettings     Json?
+    handlers              Json?
+}
+
+// model Setting {
+//   setting_uuid  String @id @default(uuid())
+//   setting_name  String @unique
+//   setting_value String
+// }
