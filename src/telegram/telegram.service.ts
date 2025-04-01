@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import TelegramBot from 'node-telegram-bot-api';
-import * as helpers from './helpers';
+import * as helpers from './helpers/telegram.helpers';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {

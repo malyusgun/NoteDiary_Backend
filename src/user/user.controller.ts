@@ -1,15 +1,25 @@
-import { Controller, Get, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import ApiError from '../exceptions/ApiError';
 import { UserDTO } from './dto/user.dto';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+import { IUserDB } from './interfaces/user.interfaces';
 
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Post('confirm')
-  async confirmMail(dto: UserDTO) {
+  async confirmMail(@Body() dto: UserDTO) {
     try {
       return await this.userService.confirmMail(dto);
     } catch (e) {
@@ -18,7 +28,7 @@ export class UserController {
     }
   }
 
-  @Get('')
+  @Get(':uuid/code')
   getConfirmMailCode(@Req() req: Request) {
     try {
       const userUuid = req.originalUrl.split('/')[2];
@@ -29,27 +39,31 @@ export class UserController {
     }
   }
 
-  async registration(req: Request) {
+  @Post('registration')
+  async registration(@Req() req: Request, @Res() res: Response) {
     try {
-      const userData = await this.userService.registration(req.body);
+      const userData = (await this.userService.registration(
+        req.body,
+      )) as unknown as { createdUser: IUserDB };
+
       res.cookie('access_token', userData.createdUser.access_token, {
         httpOnly: true,
       });
       res.cookie('refresh_token', userData.createdUser.refresh_token, {
         httpOnly: true,
       });
-
       delete userData.createdUser.access_token;
       delete userData.createdUser.refresh_token;
 
-      res.json(userData);
+      return userData;
     } catch (e) {
       console.log('error: ', e);
       return ApiError.throwServerError();
     }
   }
 
-  async login(req: Request) {
+  @Post('login')
+  async login(@Req() req: Request, @Res() res: Response) {
     try {
       const userData = (await this.userService.login(req.body)) as IUserDB;
       res.cookie('access_token', userData.access_token, { httpOnly: true });
@@ -57,7 +71,7 @@ export class UserController {
       delete userData.access_token;
       delete userData.refresh_token;
 
-      res.json(userData);
+      return userData;
     } catch (e) {
       console.log('error: ', e);
       // @ts-ignore
@@ -65,12 +79,15 @@ export class UserController {
     }
   }
 
-  refresh(req: Request) {
+  @Patch(':uuid/refresh')
+  refresh(@Req() req: Request, @Res() res: Response) {
     try {
       const refresh_token = req.cookies.refresh_token;
       const new_access_token = this.userService.refresh(refresh_token);
+
       res.cookie('access_token', new_access_token, { httpOnly: true });
-      res.json('Successfully refresh');
+
+      return 'Successfully refresh';
     } catch (e) {
       console.log('error: ', e);
       // @ts-ignore
@@ -78,55 +95,58 @@ export class UserController {
     }
   }
 
-  async logout(req: Request) {
+  @Delete()
+  async logout(@Body() dto: UserDTO, @Res() res: Response) {
     try {
-      await this.userService.logout(req.body);
+      await this.userService.logout(dto);
+
       res.clearCookie('access_token');
       res.clearCookie('refresh_token');
-      res.json('Successfully longed out');
+
+      return 'Successfully longed out';
     } catch (e) {
       console.log('error: ', e);
       return ApiError.throwServerError();
     }
   }
 
-  async getUser(req: Request) {
+  @Get(':uuid')
+  async getUser(@Req() req: Request) {
     try {
       const userUuid = req.url.split('/')[2];
       const user = await this.userService.getUser(userUuid);
       delete user.access_token;
       delete user.refresh_token;
-      res.json(user);
+
+      return user;
     } catch (e) {
       console.log('error: ', e);
       return ApiError.throwServerError();
     }
   }
 
-  async editUser(req: Request) {
+  @Patch(':uuid')
+  async editUser(@Body() dto: UserDTO) {
     try {
-      const user = await this.userService.editUser(
-        req.body as unknown as UserDTO,
-      );
-
+      const user = await this.userService.editUser(dto);
       delete user.access_token;
       delete user.refresh_token;
-      res.json(user);
+
+      return user;
     } catch (e) {
       console.log('error: ', e);
       return ApiError.throwServerError();
     }
   }
 
-  async deleteUser(req: Request) {
+  @Delete(':uuid/destroyAccount')
+  async deleteUser(@Body() dto: UserDTO) {
     try {
-      const user = await this.userService.deleteUser(
-        req.body as unknown as UserDTO,
-      );
-
+      const user = await this.userService.deleteUser(dto);
       delete user.access_token;
       delete user.refresh_token;
-      res.json(user);
+
+      return user;
     } catch (e) {
       console.log('error: ', e);
       return ApiError.throwServerError();

@@ -1,4 +1,4 @@
-import { ITableColumnDB, TDarkness, TSize, TThemeColor } from '../interfaces';
+import { ITableColumnDB, TDarkness, TSize, TThemeColor } from '../interfaces/entities.interfaces';
 
 export interface EntityDBDTO {
   sheet_uuid?: string;

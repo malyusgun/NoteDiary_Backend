@@ -24,4 +24,4 @@ import { ConfigModule } from '@nestjs/config';
   providers: [MailService],
   exports: [MailService],
 })
-export class MailerCustomModule {}
+export class MailModule {}

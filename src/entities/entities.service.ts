@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs';
-import { ISheetDB } from '../sheet/interfaces';
+import { ISheetDB } from '../sheet/interfaces/sheet.interfaces';
 import { EntityDBDTO } from './dto/entities.dto';
 import {
   createPrismaEntity,
@@ -10,7 +10,7 @@ import {
   getImagePathByUuid,
   getPrismaEntity,
   updatePrismaEntity,
-} from './helpers';
+} from './helpers/entities.helpers';
 import { SheetService } from '../sheet/sheet.service';
 import { PrismaService } from '../prisma.service';
 
@@ -47,28 +47,28 @@ export class EntitiesService {
     fs.writeFileSync(imagePath, body);
   }
 
-  async createEntity(body: EntityDBDTO) {
-    if (!body.entity_uuid) body.entity_uuid = randomUUID();
+  async createEntity(dto: EntityDBDTO) {
+    if (!dto.entity_uuid) dto.entity_uuid = randomUUID();
 
-    if (body.entity_type === 'image') {
+    if (dto.entity_type === 'image') {
       const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
       const originalImagePath = path.join(
         path.resolve(),
         `/public/images/originalImage.jpg`,
       );
       fs.writeFileSync(imagePath, this.buffer!);
-      const newImagePath = getImagePathByUuid(body.entity_uuid);
-      const newOriginalImagePath = getImagePathByUuid(body.entity_uuid, true);
+      const newImagePath = getImagePathByUuid(dto.entity_uuid);
+      const newOriginalImagePath = getImagePathByUuid(dto.entity_uuid, true);
 
       fs.renameSync(imagePath, newImagePath);
       fs.renameSync(originalImagePath, newOriginalImagePath);
-      body.image_path = newImagePath;
+      dto.image_path = newImagePath;
     }
 
-    const sheet_uuid = body.sheet_uuid!;
-    delete body.sheet_uuid;
-    const createdEntity = (await createPrismaEntity(body)) as EntityDBDTO;
-    await this.sheetService.addSheetEntity(body, sheet_uuid);
+    const sheet_uuid = dto.sheet_uuid!;
+    delete dto.sheet_uuid;
+    const createdEntity = (await createPrismaEntity(dto)) as EntityDBDTO;
+    await this.sheetService.addSheetEntity(dto, sheet_uuid);
 
     return createdEntity;
   }
@@ -118,30 +118,30 @@ export class EntitiesService {
       };
   }
 
-  cropImage(body: EntityDBDTO) {
+  cropImage(dto: EntityDBDTO) {
     const imagePath = path.join(path.resolve(), `/public/images/image.jpg`);
     fs.writeFileSync(imagePath, this.buffer!);
-    fs.unlinkSync(body.image_path!);
-    fs.renameSync(imagePath, body.image_path!);
+    fs.unlinkSync(dto.image_path!);
+    fs.renameSync(imagePath, dto.image_path!);
 
-    delete body.image_url;
+    delete dto.image_url;
     return this.prisma.image.update({
       where: {
-        entity_uuid: body.entity_uuid,
+        entity_uuid: dto.entity_uuid,
       },
-      data: { ...body },
+      data: { ...dto },
     });
   }
 
-  async returnOriginalSizeImage(body: EntityDBDTO) {
-    body.image_path = getImagePathByUuid(body.entity_uuid, true);
+  async returnOriginalSizeImage(dto: EntityDBDTO) {
+    dto.image_path = getImagePathByUuid(dto.entity_uuid, true);
     const newState = await this.prisma.image.update({
       where: {
-        entity_uuid: body.entity_uuid,
+        entity_uuid: dto.entity_uuid,
       },
-      data: { ...body },
+      data: { ...dto },
     });
-    const file = fs.readFileSync(body.image_path);
+    const file = fs.readFileSync(dto.image_path);
     const buffer = Buffer.from(file);
     return { buffer: [buffer], entity: newState };
   }
@@ -164,25 +164,22 @@ export class EntitiesService {
     };
   }
 
-  async deleteEntity(body: EntityDBDTO) {
-    await deletePrismaEntity(body);
-    if (body.image_path) {
-      fs.unlink(body.image_path, (err) => {
+  async deleteEntity(dto: EntityDBDTO) {
+    await deletePrismaEntity(dto);
+    if (dto.image_path) {
+      fs.unlink(dto.image_path, (err) => {
         if (err) throw err;
       });
-      const originalImagePath = getImagePathByUuid(body.entity_uuid, true);
+      const originalImagePath = getImagePathByUuid(dto.entity_uuid, true);
       if (fs.existsSync(originalImagePath)) {
         fs.unlink(originalImagePath, (err) => {
           if (err) throw err;
         });
       }
     }
-    await this.sheetService.deleteSheetEntity(
-      body.sheet_uuid!,
-      body.entity_uuid,
-    );
+    await this.sheetService.deleteSheetEntity(dto.sheet_uuid!, dto.entity_uuid);
     return {
-      entity_uuid: body.entity_uuid,
+      entity_uuid: dto.entity_uuid,
     };
   }
 }

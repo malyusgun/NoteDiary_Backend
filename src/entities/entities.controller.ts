@@ -2,7 +2,7 @@ import { Controller, Delete, Get, Patch, Post, Req } from '@nestjs/common';
 import { EntitiesService } from './entities.service';
 import ApiError from '../exceptions/ApiError';
 import { EntityDBDTO } from './dto/entities.dto';
-import { IChangeEntitiesOrder } from './interfaces';
+import { IChangeEntitiesOrder } from './interfaces/entities.interfaces';
 import { Request } from 'express';
 
 @Controller('sheets')

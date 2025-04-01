@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { SheetDTO, EditSheetBackgroundDTO } from './dto/sheet.dto';
 import { UserService } from '../user/user.service';
 import { EntityDBDTO } from '../entities/dto/entities.dto';
-import { ISheetDB } from './interfaces';
+import { ISheetDB } from './interfaces/sheet.interfaces';
 
 @Injectable()
 export class SheetService {
@@ -34,18 +34,18 @@ export class SheetService {
     dto.sheet_icon = 'page';
     dto.sheet_children = [];
     dto.sheet_entities = [];
-    await this.userService.addUserSheet(dto, dto.user_uuid);
+    await this.userService.addUserSheet(dto as ISheetDB, dto.user_uuid);
     return this.prisma.sheet.create({ data: dto as ISheetDB });
   }
 
-  async addSheetEntity(body: EntityDBDTO, sheet_uuid: string) {
+  async addSheetEntity(dto: EntityDBDTO, sheet_uuid: string) {
     const sheet = (await this.prisma.sheet.findFirst({
       where: {
         sheet_uuid,
       },
     })) as ISheetDB;
 
-    const newEntity = body.entity_type + '$' + body.entity_uuid;
+    const newEntity = dto.entity_type + '$' + dto.entity_uuid;
     if (sheet.sheet_entities?.length) {
       sheet.sheet_entities.push(newEntity);
     } else sheet.sheet_entities = [newEntity];
@@ -57,17 +57,17 @@ export class SheetService {
     });
   }
 
-  async editSheet(body: SheetDTO) {
+  async editSheet(dto: SheetDTO) {
     return this.prisma.sheet.update({
       where: {
-        sheet_uuid: body.sheet_uuid,
+        sheet_uuid: dto.sheet_uuid,
       },
-      data: body,
+      data: dto,
     });
   }
 
-  async editSheetBackground(body: EditSheetBackgroundDTO) {
-    const response = await fetch(body.background_url);
+  async editSheetBackground(dto: EditSheetBackgroundDTO) {
+    const response = await fetch(dto.background_url);
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -78,22 +78,22 @@ export class SheetService {
     fs.writeFileSync(imagePath, buffer);
     const currentSheet = (await this.prisma.sheet.findFirst({
       where: {
-        sheet_uuid: body.sheet_uuid,
+        sheet_uuid: dto.sheet_uuid,
       },
     })) as ISheetDB;
     return this.prisma.sheet.update({
       where: {
-        sheet_uuid: body.sheet_uuid,
+        sheet_uuid: dto.sheet_uuid,
       },
       data: { ...currentSheet, background_path: imagePath },
     });
   }
 
-  async deleteSheet(sheet: SheetDTO) {
-    await this.userService.deleteUserSheet(sheet.sheet_uuid!, sheet.user_uuid);
+  async deleteSheet(dto: SheetDTO) {
+    await this.userService.deleteUserSheet(dto.sheet_uuid!, dto.user_uuid);
     return this.prisma.sheet.delete({
       where: {
-        sheet_uuid: sheet.sheet_uuid,
+        sheet_uuid: dto.sheet_uuid,
       },
     });
   }
