@@ -6,6 +6,7 @@ import { UserDTO } from './dto/user.dto';
 import {
   convertUserData,
   getUserDataFromAuthFile,
+  getUserSheets,
 } from './helpers/user.helpers';
 import { MailService } from '../mail/mail.service';
 import { TokenService } from '../token/token.service';
@@ -56,11 +57,11 @@ export class UserService {
     return userData.code;
   }
 
-  async registration(dto: UserDTO) {
-    const userData = { ...dto };
+  async registration(body: IUserDB) {
+    const userData = { ...body };
     const tokens = this.tokenService.generateTokens({
-      user_uuid: dto.user_uuid!,
-      password: dto.password,
+      user_uuid: body.user_uuid!,
+      password: body.password,
     });
     let userDataDB = { ...userData, access_token: '', refresh_token: '' };
     userDataDB.access_token = tokens.accessToken;
@@ -81,16 +82,20 @@ export class UserService {
 
   async login(dto: UserDTO): Promise<IUserDB | IError> {
     let userDataDB = await this.getUser(dto.nick_name, true);
-    if (dto.password !== userDataDB.password) {
+
+    const userSheets = await getUserSheets(dto.user_uuid!);
+    const user = { ...userDataDB, user_sheets: userSheets };
+
+    if (dto.password !== user.password) {
       return ApiError.throwForbiddenException();
     }
     const tokens = this.tokenService.generateTokens({
-      user_uuid: userDataDB.user_uuid,
-      password: userDataDB.password,
+      user_uuid: user.user_uuid,
+      password: user.password,
     });
-    userDataDB.access_token = tokens.accessToken;
-    userDataDB.refresh_token = tokens.refreshToken;
-    return userDataDB;
+    user.access_token = tokens.accessToken;
+    user.refresh_token = tokens.refreshToken;
+    return user;
   }
 
   async logout(dto: UserDTO) {
@@ -99,26 +104,23 @@ export class UserService {
         nick_name: dto.nick_name,
       },
     })) as unknown as IUserDB;
-    let userDataWithoutTokens = {
-      ...userDataDB,
-      user_sheets: JSON.stringify(dto.user_sheets),
-    };
-    delete userDataWithoutTokens.access_token;
-    delete userDataWithoutTokens.refresh_token;
+
+    delete userDataDB.access_token;
+    delete userDataDB.refresh_token;
     await this.prisma.user.update({
       where: {
-        user_uuid: userDataWithoutTokens.user_uuid,
+        user_uuid: userDataDB.user_uuid,
       },
-      data: userDataWithoutTokens,
+      data: userDataDB,
     });
     return true;
   }
 
-  async createUser(dto: UserDTO) {
+  async createUser(body: IUserDB) {
     const homeSheetUuid = randomUUID();
     const userSheets = [
       {
-        user_uuid: dto.user_uuid,
+        user_uuid: body.user_uuid,
         sheet_uuid: homeSheetUuid,
         sheet_title: 'Home page',
         sheet_icon: 'home',
@@ -127,7 +129,7 @@ export class UserService {
     ];
 
     const createdUser = await this.prisma.user.create({
-      data: { ...dto, user_sheets: JSON.stringify(userSheets) },
+      data: body,
     });
     const startEntity = {
       entity_uuid: randomUUID(),
@@ -146,7 +148,7 @@ export class UserService {
     };
 
     const homeSheet = {
-      user_uuid: dto.user_uuid,
+      user_uuid: body.user_uuid,
       sheet_uuid: homeSheetUuid,
       sheet_title: 'Home page',
       sheet_icon: 'home',
@@ -156,13 +158,15 @@ export class UserService {
     await this.entitiesService.createEntity(startEntity as EntityDBDTO);
 
     return {
-      createdUser,
+      createdUser: { ...createdUser, user_sheets: userSheets },
       homeSheet,
       startEntity,
     };
   }
 
   async getUser(uniqueKey: string, isNickName?: boolean) {
+    // если запрос идёт по user_nickName с метода login (где доступа к user_uuid нет),
+    // где userSheets получаются позже после вызова этого метода
     if (isNickName) {
       return this.prisma.user.findFirst({
         where: {
@@ -170,22 +174,24 @@ export class UserService {
         },
       }) as unknown as IUserDB;
     }
-    return this.prisma.user.findFirst({
+
+    // uniqueKey = user_uuid
+    const userSheets = await getUserSheets(uniqueKey);
+    const userDataDB = this.prisma.user.findFirst({
       where: {
         user_uuid: uniqueKey,
       },
     }) as unknown as IUserDB;
+    return { ...userDataDB, user_sheets: userSheets };
   }
 
-  async addUserSheet(sheet: ISheetDB, user_uuid: string) {
+  async addUserSheet(user_uuid: string) {
     const user = (await this.prisma.user.findFirst({
       where: {
         user_uuid: user_uuid,
       },
     })) as unknown as IUserDB;
-    const userSheets = JSON.parse(user.user_sheets);
-    userSheets.push(sheet);
-    user.user_sheets = JSON.stringify(userSheets);
+
     return this.prisma.user.update({
       data: user as IUserDB,
       where: {
@@ -200,12 +206,17 @@ export class UserService {
         user_uuid: dto.user_uuid,
       },
     });
-    return this.prisma.user.update({
-      data: { ...user, ...dto, user_sheets: JSON.stringify(dto.user_sheets) },
+
+    const updatedUser = { ...user, ...dto };
+    const { user_sheets, ...newState } = updatedUser;
+
+    const updatedUserDB = (await this.prisma.user.update({
+      data: newState,
       where: {
         user_uuid: dto.user_uuid,
       },
-    }) as unknown as IUserDB;
+    })) as unknown as IUserDB;
+    return { ...updatedUserDB, user_sheets };
   }
 
   async deleteUser(dto: UserDTO) {
@@ -229,11 +240,11 @@ export class UserService {
       },
     })) as IUserDB;
 
-    let userSheets = JSON.parse(currentUser.user_sheets);
-    userSheets = userSheets.filter(
-      (sheet: ISheetDB) => sheet.sheet_uuid !== sheet_uuid,
-    );
-    currentUser.user_sheets = JSON.stringify(userSheets);
+    this.prisma.sheet.delete({
+      where: {
+        sheet_uuid,
+      },
+    });
 
     return this.prisma.user.update({
       data: currentUser,

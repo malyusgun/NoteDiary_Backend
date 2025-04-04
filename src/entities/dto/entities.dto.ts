@@ -1,10 +1,16 @@
-import { ITableColumnDB, TDarkness, TSize, TThemeColor } from '../interfaces/entities.interfaces';
+import {
+  ITableColumnDB,
+  TDarkness,
+  TSize,
+  TThemeColor,
+} from '../interfaces/entities.interfaces';
+import { IsArray, IsObject } from 'class-validator';
 
-export interface EntityDBDTO {
+export class EntityDBDTO {
   sheet_uuid?: string;
   entity_uuid: string;
   readonly entity_type: 'divider' | 'paragraph' | 'image' | 'table';
-  entity_order?: number;
+  entity_order: number;
   readonly divider_height?: number;
   readonly divider_type?: 'solid' | 'dashed' | 'dotted';
   title?: string | null;
@@ -16,10 +22,15 @@ export interface EntityDBDTO {
   image_path?: string;
   image_url?: string;
   readonly image_width?: number;
+  readonly image_width_initial: number;
   readonly image_height?: number;
+  readonly file_width_initial: number;
+  readonly file_height_initial: number;
   readonly entity_position?: string;
   readonly entity_title_position?: string;
   readonly image_scale?: string;
+  @IsArray()
+  @IsObject({ each: true })
   readonly table_columns?: ITableColumnDB[];
   readonly table_data?: unknown[][];
   readonly multipleSort?: boolean;

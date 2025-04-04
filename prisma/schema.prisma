@@ -19,7 +19,6 @@ model User {
   password       String
   email          String
   favorite_color String
-  user_sheets    Json?
   access_token   String?
   refresh_token  String?
 }
@@ -77,30 +76,33 @@ model Image {
 }
 
 model Table {
-    entity_type           String
-    entity_uuid           String  @id @default(uuid())
-    entity_order          Int
-    title                 String?
-    entity_position       String?
-    entity_title_position String?
-    table_columns         Json?
-    table_data            Json?
-    multipleSort          Boolean?
-    gap                   String?
-    size                  String?
-    font_size             String?
-    showAllLines          Boolean?
-    stripedRows           Boolean?
-    center                Boolean?
-    fontSize              String?
-    theme                 String?
-    textColor             String?
-    darknessTheme         String?
-    darknessTextColor     String?
-    paginator             Boolean?
-    editable              Boolean?
-    noEditingSettings     Json?
-    handlers              Json?
+  entity_type           String
+  entity_uuid           String   @id @default(uuid())
+  entity_order          Int
+  title                 String?
+  entity_position       String?
+  entity_title_position String?
+  table_columns         Json?
+  table_data            Json?
+  multipleSort          Boolean?
+  gap                   String?
+  size                  String?
+  font_size             String?
+  showAllLines          Boolean?
+  stripedRows           Boolean?
+  center                Boolean?
+  fontSize              String?
+  theme                 String?
+  textColor             String?
+  darknessTheme         String?
+  darknessTextColor     String?
+  paginator             Boolean?
+  editable              Boolean?
+  noEditingSettings     Json?
+  handlers              Json?
+}
+
+model TableColumns {
 }
 
 // model Setting {

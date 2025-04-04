@@ -34,7 +34,7 @@ export class SheetService {
     dto.sheet_icon = 'page';
     dto.sheet_children = [];
     dto.sheet_entities = [];
-    await this.userService.addUserSheet(dto as ISheetDB, dto.user_uuid);
+    await this.userService.addUserSheet(dto.user_uuid);
     return this.prisma.sheet.create({ data: dto as ISheetDB });
   }
 

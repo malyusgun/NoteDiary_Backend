@@ -4,9 +4,17 @@ export interface IUserDB {
   password: string;
   email: string;
   favorite_color: string;
-  user_sheets: string;
   access_token?: string;
   refresh_token?: string;
+}
+
+export interface IUserAuth {
+  user_uuid: string;
+  code: string;
+  nick_name: string;
+  email: string;
+  password: string;
+  codeDieTime: string;
 }
 
 export interface IError {

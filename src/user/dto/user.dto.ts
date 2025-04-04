@@ -8,12 +8,3 @@ export class UserDTO {
   favorite_color: string;
   user_sheets: SheetDTO[];
 }
-
-export interface IUserAuth {
-  user_uuid: string;
-  code: string;
-  nick_name: string;
-  email: string;
-  password: string;
-  codeDieTime: string;
-}

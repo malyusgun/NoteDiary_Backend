@@ -1,6 +1,10 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { UserDTO, IUserAuth } from '../dto/user.dto';
+import { UserDTO } from '../dto/user.dto';
+import { IUserAuth } from '../interfaces/user.interfaces';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient({});
 
 export const getUserDataFromAuthFile = (user_uuid: string): IUserAuth => {
   const usersDataFile = path.join(path.resolve(), `/public/auth.txt`);
@@ -31,4 +35,12 @@ export const convertUserData = (
       codeDieTime: chunks[5],
     };
   }
+};
+
+export const getUserSheets = async (user_uuid: string) => {
+  return prisma.sheet.findMany({
+    where: {
+      user_uuid,
+    },
+  });
 };

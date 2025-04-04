@@ -40,10 +40,10 @@ export class UserController {
   }
 
   @Post('registration')
-  async registration(@Req() req: Request, @Res() res: Response) {
+  async registration(@Body() body: IUserDB, @Res() res: Response) {
     try {
       const userData = (await this.userService.registration(
-        req.body,
+        body,
       )) as unknown as { createdUser: IUserDB };
 
       res.cookie('access_token', userData.createdUser.access_token, {
