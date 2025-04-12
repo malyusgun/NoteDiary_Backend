@@ -31,8 +31,8 @@ export class EntityDBDTO {
   readonly image_scale?: string;
   @IsArray()
   @IsObject({ each: true })
-  readonly table_columns?: ITableColumnDB[];
-  readonly table_data?: unknown[][];
+  table_columns?: ITableColumnDB[];
+  table_data?: unknown[][];
   readonly multipleSort?: boolean;
   readonly gap?: string;
   readonly size?: TSize;

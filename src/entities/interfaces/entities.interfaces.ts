@@ -1,12 +1,8 @@
-interface IEntityUuidAndOrder {
-  entity_uuid: string;
-  entity_order: number;
-  entity_type: 'divider' | 'paragraph' | 'image' | 'table';
-}
+import { EntityDBDTO } from '../dto/entities.dto';
 
 export interface IChangeEntitiesOrder {
-  main: IEntityUuidAndOrder;
-  target: IEntityUuidAndOrder;
+  main: EntityDBDTO;
+  target: EntityDBDTO;
 }
 
 export interface ITableColumnDB {
@@ -19,6 +15,25 @@ export interface ITableColumnDB {
   sortable?: boolean;
   initSort?: 'up' | 'down' | 'none';
   padding?: string;
+}
+
+export interface ITableColumnSelect {
+  value: string;
+  label?: string;
+  group?: string;
+  iconLeft?: string;
+  iconRight?: string;
+  iconLeftColor?: string;
+  iconRightColor?: string;
+  color?: string;
+  background?: string;
+}
+
+export interface ITableColumnProgressBar {
+  start?: number;
+  end?: number;
+  color?: string;
+  darknessColor?: string;
 }
 
 export type TTableColumnType =

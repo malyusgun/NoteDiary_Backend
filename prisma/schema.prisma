@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model user {
   user_uuid      String  @id @default(uuid())
   nick_name      String
   password       String
@@ -23,7 +23,7 @@ model User {
   refresh_token  String?
 }
 
-model Sheet {
+model sheet {
   user_uuid       String
   sheet_uuid      String   @id @default(uuid())
   sheet_title     String
@@ -33,7 +33,7 @@ model Sheet {
   sheet_entities  String[]
 }
 
-model Divider {
+model divider {
   entity_type    String
   entity_uuid    String  @id @default(uuid())
   entity_order   Int
@@ -41,7 +41,7 @@ model Divider {
   divider_type   String?
 }
 
-model Paragraph {
+model paragraph {
   entity_type           String
   entity_uuid           String  @id @default(uuid())
   entity_order          Int
@@ -53,7 +53,7 @@ model Paragraph {
   entity_title_position String?
 }
 
-model Image {
+model image {
   entity_type           String
   entity_uuid           String  @id @default(uuid())
   entity_order          Int
@@ -75,15 +75,14 @@ model Image {
   entity_position       String?
 }
 
-model Table {
+model table {
   entity_type           String
   entity_uuid           String   @id @default(uuid())
   entity_order          Int
   title                 String?
   entity_position       String?
   entity_title_position String?
-  table_columns         Json?
-  table_data            Json?
+  table_data            String?
   multipleSort          Boolean?
   gap                   String?
   size                  String?
@@ -98,11 +97,77 @@ model Table {
   darknessTextColor     String?
   paginator             Boolean?
   editable              Boolean?
-  noEditingSettings     Json?
-  handlers              Json?
 }
 
-model TableColumns {
+model table_columns {
+  name String
+  column_index Int
+  entity_uuid String @id @default(uuid())
+  type String?
+  width Int?
+  editable Boolean?
+  filterable Boolean?
+  sortable Boolean?
+  initSort String?
+  padding String?
+}
+
+model table_columns_options {
+  entity_uuid String @id @default(uuid())
+  column_index Int
+  active Boolean?
+  label  String?
+  labelPos String?
+  size String?
+  theme String?
+  activeTheme String?
+  textColor String?
+  value String?
+  rounded Boolean?
+  iconLeft String?
+  iconRight String?
+  background String?
+  selected String?
+  width String?
+  listHeight String?
+  placeholder String?
+  color String?
+  openIcon String?
+  value_number Int?
+  count Int?
+  gap String?
+  offTheme String?
+  max Int?
+  height String?
+  fontSize String?
+  inactiveTheme String?
+  gradient String?
+  showLabel Boolean?
+  labelBefore String?
+  labelAfter String?
+}
+
+model select_options {
+  entity_uuid String @id @default(uuid())
+  column_index Int
+  value String
+  label String?
+  group String?
+  iconLeft String?
+  iconRight String?
+  iconLeftColor String?
+  iconRightColor String?
+  color String?
+  background String?
+}
+
+model progressbar_gaps {
+  entity_uuid String @id @default(uuid())
+  column_index Int
+  start Int?
+  end Int?
+  color String?
+  darknessColor String?
 }
 
 // model Setting {
